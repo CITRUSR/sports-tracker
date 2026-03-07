@@ -1,0 +1,36 @@
+name: CI/CD Docker Compose Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build and test backend
+        run: |
+          cd back
+          dotnet restore
+          dotnet build --configuration Release
+          dotnet test --no-build --verbosity normal
+
+      - name: SSH Deploy with Docker Compose
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /sports-tracker
+            git pull
+            docker compose up frontend-prod backend -d --build
