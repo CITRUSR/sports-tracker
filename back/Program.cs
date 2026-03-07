@@ -8,7 +8,7 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("default", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -25,7 +25,7 @@ app.UseCors("default");
 
 app.UseHttpsRedirection();
 
-app.MapGet("/healthcheck", () =>
+app.MapGet("/api/healthcheck", () =>
 {
     return Results.Ok(Assembly.GetExecutingAssembly().GetName().Version?.ToString());
 })
