@@ -1,5 +1,7 @@
-const useLocalEndpoints = true;
+const useLocalEndpoints = false;
 
 export const urls = {
-  ...(useLocalEndpoints ? { api: '/api' } : { api: 'http://ip:5000' }),
+  ...(useLocalEndpoints
+    ? { api: 'http://localhost:5000/api' }
+    : { api: 'http://176.108.255.65:80/api' }),
 };
