@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-backend
+
+WORKDIR /app/backend
+
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . ./
+
+RUN dotnet publish -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+COPY --from=build-backend /app/publish ./
+
+ENTRYPOINT ["dotnet", "back.dll"]
