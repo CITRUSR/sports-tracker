@@ -1,16 +1,29 @@
 version: "3.9"
 
 services:
-  frontend:
+  frontend-prod:
     build:
       context: ./front
-      dockerfile: Dockerfile.yml
+      dockerfile: Dockerfile.prod.yml
     ports:
       - "80:80"
     networks:
       - local
     depends_on:
       - backend
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile.yml
+    ports:
+      - "5173:5173"
+    networks:
+      - local
+    depends_on:
+      - backend
+    volumes:
+      - ./front:/app
+      - /app/node_modules
   backend:
     build:
       context: ./back
