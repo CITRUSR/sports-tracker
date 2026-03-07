@@ -31,6 +31,6 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            cd /sports-tracker
+            cd ~/sports-tracker
             git pull
             docker compose up frontend-prod backend -d --build
