@@ -9,6 +9,7 @@ services:
       - "80:80"
     networks:
       - local
+    restart: unless-stopped
     depends_on:
       - backend
   frontend:
@@ -30,6 +31,7 @@ services:
       dockerfile: Dockerfile.yml
     ports:
       - "5000:5000"
+    restart: unless-stopped
     networks:
       - local
     environment:
