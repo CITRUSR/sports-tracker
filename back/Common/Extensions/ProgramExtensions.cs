@@ -1,5 +1,9 @@
 using System.Reflection;
 using back.Common.Markers;
+using back.Domain;
+using back.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace back.Common.Extensions;
 
@@ -9,6 +13,7 @@ public static class ProgramExtensions
     {
         AddSwagger(builder);
         ConfigureCors(builder);
+        ConfigureDb(builder, builder.Configuration);
 
         return builder;
     }
@@ -46,6 +51,34 @@ public static class ProgramExtensions
         {
             UseSwagger(app);
         }
+
+        MigrateDb(app);
+    }
+
+    private static void ConfigureDb(WebApplicationBuilder builder, IConfiguration configuration)
+    {
+        builder.Services.AddDbContext<AppDbContext>(opt =>
+              {
+                  opt.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+              });
+
+        builder.Services.AddIdentity<AppUser, IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+        builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+    }
+
+    private static void MigrateDb(WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        if (dbContext.Database.GetPendingMigrations().Any())
+        {
+            dbContext.Database.Migrate();
+        }
+
     }
 
     private static void AddSwagger(WebApplicationBuilder builder)
