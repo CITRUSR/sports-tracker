@@ -33,4 +33,4 @@ jobs:
           script: |
             cd ~/sports-tracker
             git pull
-            docker compose up frontend-prod backend -d --build
+            docker compose up frontend-prod backend db -d --build
