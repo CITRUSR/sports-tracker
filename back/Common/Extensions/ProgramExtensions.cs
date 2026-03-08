@@ -1,4 +1,5 @@
 using System.Reflection;
+using back.Common.Markers;
 
 namespace back.Common.Extensions;
 
@@ -23,11 +24,23 @@ public static class ProgramExtensions
 
         app.UseHttpsRedirection();
 
-        app.MapGet("/api/healthcheck", () =>
+        MapEndpoints(app);
+    }
+
+    private static void MapEndpoints(WebApplication app)
+    {
+        var endpointsRoot = app.MapGroup("/api");
+        var endpointsTypes = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(x => typeof(IEndpointMarker)
+            .IsAssignableFrom(x))
+            .Where(x => !x.IsAbstract || !x.IsInterface);
+
+        foreach (var type in endpointsTypes)
         {
-            return Results.Ok(Assembly.GetExecutingAssembly().GetName().Version?.ToString());
-        })
-        .WithName("HealthCheck");
+            var instance = (IEndpointMarker)Activator.CreateInstance(type);
+            instance?.MapEndpoints(endpointsRoot);
+        }
     }
 
     private static void ConfigureCors(WebApplicationBuilder builder)
