@@ -7,7 +7,7 @@ public static class ProgramExtensions
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
-        builder.Services.AddOpenApi();
+        AddSwagger(builder);
         ConfigureCors(builder);
 
         return builder;
@@ -41,6 +41,23 @@ public static class ProgramExtensions
             var instance = (IEndpointMarker)Activator.CreateInstance(type);
             instance?.MapEndpoints(endpointsRoot);
         }
+
+        if (app.Environment.IsDevelopment())
+        {
+            UseSwagger(app);
+        }
+    }
+
+    private static void AddSwagger(WebApplicationBuilder builder)
+    {
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+    }
+
+    private static void UseSwagger(WebApplication app)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
     }
 
     private static void ConfigureCors(WebApplicationBuilder builder)
