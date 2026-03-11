@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using back.Common.Helpers;
 using back.Common.Markers;
 
 namespace back.Features.Auth;
@@ -11,10 +12,9 @@ public class AuthEndpoints : IEndpointMarker
     {
         app.MapPost($"{_baseRoute}/register", async (RegisterUserDto dto, IAuthService authService) =>
         {
-            var context = new ValidationContext(dto);
-            var validationResults = new List<ValidationResult>();
-            if (!Validator.TryValidateObject(dto, context, validationResults, true))
-                return Results.BadRequest(validationResults.Select(x => x.ErrorMessage));
+            var errors = EndpointHelpers.Validate(dto);
+            if (errors.Any())
+                return Results.BadRequest(errors);
 
             var result = await authService.RegisterUserAsync(dto);
             if (!result.IsSuccess)
