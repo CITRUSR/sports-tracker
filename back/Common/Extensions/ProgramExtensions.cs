@@ -1,6 +1,7 @@
 using System.Reflection;
 using back.Common.Markers;
 using back.Domain;
+using back.Features.Auth;
 using back.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ public static class ProgramExtensions
         AddSwagger(builder);
         ConfigureCors(builder);
         ConfigureDb(builder, builder.Configuration);
+        AddServices(builder);
 
         return builder;
     }
@@ -104,5 +106,10 @@ public static class ProgramExtensions
                      .AllowAnyHeader();
            });
        });
+    }
+
+    private static void AddServices(WebApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<IAuthService, AuthService>();
     }
 }
