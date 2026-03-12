@@ -1,11 +1,14 @@
 using System.Reflection;
+using System.Text;
 using back.Common.Markers;
 using back.Common.Types;
 using back.Domain;
 using back.Features.Auth;
 using back.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace back.Common.Extensions;
 
@@ -18,6 +21,7 @@ public static class ProgramExtensions
         ConfigureCors(builder);
         ConfigureDb(builder, builder.Configuration);
         AddServices(builder);
+        AddJwt(builder);
 
         return builder;
     }
@@ -32,6 +36,9 @@ public static class ProgramExtensions
         app.UseCors("default");
 
         app.UseHttpsRedirection();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         MapEndpoints(app);
     }
@@ -113,5 +120,29 @@ public static class ProgramExtensions
     private static void AddServices(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<IAuthService, AuthService>();
+    }
+
+    private static void AddJwt(WebApplicationBuilder builder)
+    {
+        builder.Services.AddAuthentication(opt =>
+        {
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(opt =>
+        {
+            opt.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]))
+            };
+        });
+
+        builder.Services.AddAuthorization();
     }
 }
