@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using back.Common.Helpers;
 using back.Common.Markers;
 
@@ -10,6 +9,18 @@ public class AuthEndpoints : IEndpointMarker
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
+        app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService) =>
+        {
+            var result = await authService.LoginAsync(dto);
+            if (!result.IsSuccess)
+                return Results.BadRequest(result.Errors);
+
+            return Results.Ok(result.Data);
+        })
+        .WithDescription("Login user")
+        .Produces(StatusCodes.Status200OK, typeof(string))
+        .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>));
+
         app.MapPost($"{_baseRoute}/register", async (RegisterUserDto dto, IAuthService authService) =>
         {
             var errors = EndpointHelpers.Validate(dto);
