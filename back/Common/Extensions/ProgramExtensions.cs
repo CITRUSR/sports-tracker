@@ -1,5 +1,6 @@
 using System.Reflection;
 using back.Common.Markers;
+using back.Common.Types;
 using back.Domain;
 using back.Features.Auth;
 using back.Infrastructure;
@@ -12,6 +13,7 @@ public static class ProgramExtensions
 {
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
+        builder.Services.Configure<AppSettings>(builder.Configuration);
         AddSwagger(builder);
         ConfigureCors(builder);
         ConfigureDb(builder, builder.Configuration);
