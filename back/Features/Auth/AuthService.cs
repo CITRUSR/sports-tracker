@@ -16,14 +16,14 @@ public class AuthService : IAuthService
 
     public async Task<Result> RegisterUserAsync(RegisterUserDto dto, CancellationToken cancellationToken = default)
     {
-        var userWithSameLoginExists = await _userManager.Users.AnyAsync(x => x.UserName == dto.Login, cancellationToken);
+        var userWithSameLoginExists = await _userManager.Users.AnyAsync(x => x.Login == dto.Login, cancellationToken);
 
         if (userWithSameLoginExists)
             return Result.Failure("User with same login already exists");
 
         var user = new AppUser
         {
-            UserName = dto.Login,
+            Login = dto.Login,
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
