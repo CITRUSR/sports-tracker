@@ -6,6 +6,7 @@ namespace back.Features.Auth;
 public class AuthEndpoints : IEndpointMarker
 {
     private const string _baseRoute = "auth";
+    private const string _tag = "Auth";
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
@@ -17,6 +18,7 @@ public class AuthEndpoints : IEndpointMarker
 
             return Results.Ok(result.Data);
         })
+        .WithTags(_tag)
         .WithDescription("Login user")
         .Produces(StatusCodes.Status200OK, typeof(string))
         .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>));
@@ -33,6 +35,7 @@ public class AuthEndpoints : IEndpointMarker
 
             return Results.Ok();
         })
+        .WithTags(_tag)
         .WithDescription(
             "Password must be at least 6 characters long, contain at least one uppercase letter, " +
             "one lowercase letter, one number and one special character.\n" +
