@@ -2,7 +2,7 @@ namespace back.Common.Types;
 
 public class AppSettings
 {
-    public JwtSettings JwtSettings { get; set; }
+    public JwtSettings Jwt { get; set; }
 }
 
 public class JwtSettings

@@ -144,5 +144,7 @@ public static class ProgramExtensions
         });
 
         builder.Services.AddAuthorization();
+
+        builder.Services.AddSingleton<ITokenService, TokenService>();
     }
 }

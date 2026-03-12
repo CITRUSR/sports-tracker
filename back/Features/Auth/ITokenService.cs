@@ -1,0 +1,8 @@
+using back.Domain;
+
+namespace back.Features.Auth;
+
+public interface ITokenService
+{
+    string GenerateToken(AppUser user);
+}
