@@ -9,19 +9,20 @@ public class AuthEndpoints : IEndpointMarker
 {
     private const string _baseRoute = "auth";
     private const string _tag = "Auth";
+    private const string _refreshTokenCookieKey = "refresh-token";
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
         app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService,
             IOptions<AppSettings> appSettingsOpt, HttpContext context) =>
         {
-            var existingRefreshToken = context.Request.Cookies["refresh-token"];
+            var existingRefreshToken = context.Request.Cookies[_refreshTokenCookieKey];
 
             var result = await authService.LoginAsync(dto, existingRefreshToken);
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            context.Response.Cookies.Append("refresh-token", result.Data.RefreshToken, new CookieOptions
+            context.Response.Cookies.Append(_refreshTokenCookieKey, result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 // TODO: make secure
@@ -61,13 +62,13 @@ public class AuthEndpoints : IEndpointMarker
         app.MapPost($"{_baseRoute}/refresh", async (HttpContext context, ITokenService tokenService,
             IOptions<AppSettings> appSettingsOpt) =>
         {
-            var existingRefreshToken = context.Request.Cookies["refresh-token"];
+            var existingRefreshToken = context.Request.Cookies[_refreshTokenCookieKey];
 
             var result = await tokenService.RefreshAsync(existingRefreshToken);
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            context.Response.Cookies.Append("refresh-token", result.Data.RefreshToken, new CookieOptions
+            context.Response.Cookies.Append(_refreshTokenCookieKey, result.Data.RefreshToken, new CookieOptions
             {
                 HttpOnly = true,
                 // TODO: make secure
