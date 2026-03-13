@@ -3,6 +3,7 @@ namespace back.Common.Types;
 public class AppSettings
 {
     public JwtSettings Jwt { get; set; }
+    public string RefreshTokenLifeTimeInDays { get; set; }
 }
 
 public class JwtSettings
