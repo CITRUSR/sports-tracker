@@ -22,14 +22,7 @@ public class AuthEndpoints : IEndpointMarker
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            context.Response.Cookies.Append(_refreshTokenCookieKey, result.Data.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                // TODO: make secure
-                Secure = false,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(appSettingsOpt.Value.RefreshTokenLifeTimeInDays),
-            });
+            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context);
 
             return Results.Ok(result.Data.AccessToken);
         })
@@ -68,14 +61,7 @@ public class AuthEndpoints : IEndpointMarker
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            context.Response.Cookies.Append(_refreshTokenCookieKey, result.Data.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                // TODO: make secure
-                Secure = false,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(appSettingsOpt.Value.RefreshTokenLifeTimeInDays),
-            });
+            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context);
 
             return Results.Ok(result.Data.AccessToken);
         })
@@ -84,5 +70,18 @@ public class AuthEndpoints : IEndpointMarker
         .Produces(StatusCodes.Status200OK, typeof(string))
         .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>))
         .Produces(StatusCodes.Status401Unauthorized);
+    }
+
+    private static void AddRefreshTokenToCookie(string refreshToken, int refreshTokenLifeTimeInDays,
+        HttpContext httpContext)
+    {
+        httpContext.Response.Cookies.Append(_refreshTokenCookieKey, refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            // TODO: make secure
+            Secure = false,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddDays(refreshTokenLifeTimeInDays),
+        });
     }
 }
