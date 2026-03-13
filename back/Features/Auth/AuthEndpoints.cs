@@ -57,5 +57,31 @@ public class AuthEndpoints : IEndpointMarker
         )
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>));
+
+        app.MapPost($"{_baseRoute}/refresh", async (HttpContext context, ITokenService tokenService,
+            IOptions<AppSettings> appSettingsOpt) =>
+        {
+            var existingRefreshToken = context.Request.Cookies["refresh-token"];
+
+            var result = await tokenService.RefreshAsync(existingRefreshToken);
+            if (!result.IsSuccess)
+                return Results.BadRequest(result.Errors);
+
+            context.Response.Cookies.Append("refresh-token", result.Data.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                // TODO: make secure
+                Secure = false,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(appSettingsOpt.Value.RefreshTokenLifeTimeInDays),
+            });
+
+            return Results.Ok(result.Data.AccessToken);
+        })
+        .WithTags(_tag)
+        .WithDescription("Refresh access token")
+        .Produces(StatusCodes.Status200OK, typeof(string))
+        .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>))
+        .Produces(StatusCodes.Status401Unauthorized);
     }
 }
