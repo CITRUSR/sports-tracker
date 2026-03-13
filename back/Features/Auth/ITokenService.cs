@@ -10,4 +10,5 @@ public interface ITokenService
 
     Task<RefreshToken> CreateRefreshTokenAsync(string token, string userId, CancellationToken cancellationToken = default);
     Task<Result> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
+    Task<Result> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 }

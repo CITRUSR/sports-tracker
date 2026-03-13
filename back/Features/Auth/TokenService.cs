@@ -85,4 +85,25 @@ public class TokenService : ITokenService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public async Task<Result> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+        if (refreshToken == null)
+        {
+            return Result.Failure("Refresh token not found");
+        }
+
+        if (refreshToken.IsRevoked)
+        {
+            return Result.Failure("Refresh token is revoked");
+        }
+
+        if (refreshToken.ExpiresAt < DateTimeOffset.UtcNow)
+        {
+            return Result.Failure("Refresh token expired");
+        }
+
+        return Result.Success();
+    }
 }
