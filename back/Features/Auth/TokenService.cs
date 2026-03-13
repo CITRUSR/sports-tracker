@@ -86,24 +86,47 @@ public class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<Result> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+    public async Task<Result<RefreshToken>> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
         var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
         if (refreshToken == null)
         {
-            return Result.Failure("Refresh token not found");
+            return Result<RefreshToken>.Failure("Refresh token not found");
         }
 
         if (refreshToken.IsRevoked)
         {
-            return Result.Failure("Refresh token is revoked");
+            return Result<RefreshToken>.Failure("Refresh token is revoked");
         }
 
         if (refreshToken.ExpiresAt < DateTimeOffset.UtcNow)
         {
-            return Result.Failure("Refresh token expired");
+            return Result<RefreshToken>.Failure("Refresh token expired");
         }
 
-        return Result.Success();
+        return Result<RefreshToken>.Success(refreshToken);
+    }
+
+    public async Task<Result<RefreshTokenResult>> RefreshAsync(string token, CancellationToken cancellationToken = default)
+    {
+        if (token == null)
+            return Result<RefreshTokenResult>.Failure("Refresh token not found");
+
+        var validationResult = await ValidateRefreshTokenAsync(token, cancellationToken);
+        if (!validationResult.IsSuccess)
+        {
+            return Result<RefreshTokenResult>.Failure("Refresh token is invalid");
+        }
+
+        var accessToken = GenerateToken(validationResult.Data.User);
+        var refreshToken = GenerateRefreshToken();
+
+        //TODO: add tx
+        await RevokeRefreshTokenAsync(validationResult.Data.Token);
+        await CreateRefreshTokenAsync(refreshToken, validationResult.Data.User.Id);
+
+        return Result<RefreshTokenResult>.Success(new RefreshTokenResult(accessToken, refreshToken));
     }
 }
+
+public record RefreshTokenResult(string AccessToken, string RefreshToken);
