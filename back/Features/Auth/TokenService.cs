@@ -5,6 +5,7 @@ using System.Text;
 using back.Common.Types;
 using back.Domain;
 using back.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -35,6 +36,23 @@ public class TokenService : ITokenService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return refreshToken;
+    }
+
+    public async Task<Result> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+
+        if (refreshToken == null)
+        {
+            return Result.Failure("Refresh token not found");
+        }
+
+        refreshToken.IsRevoked = true;
+        refreshToken.RevokedAt = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 
     public string GenerateRefreshToken()

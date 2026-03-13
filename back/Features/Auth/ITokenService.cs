@@ -1,3 +1,4 @@
+using back.Common.Types;
 using back.Domain;
 
 namespace back.Features.Auth;
@@ -8,4 +9,5 @@ public interface ITokenService
     string GenerateRefreshToken();
 
     Task<RefreshToken> CreateRefreshTokenAsync(string token, string userId, CancellationToken cancellationToken = default);
+    Task<Result> RevokeRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
 }
