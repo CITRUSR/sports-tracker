@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using back.Common.Types;
 using back.Domain;
@@ -15,6 +16,16 @@ public class TokenService : ITokenService
     public TokenService(IOptions<AppSettings> appSettingsOpt)
     {
         _jwtSettings = appSettingsOpt.Value.Jwt;
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+
+        using var generator = RandomNumberGenerator.Create();
+        generator.GetBytes(randomNumber);
+
+        return Convert.ToBase64String(randomNumber);
     }
 
     public string GenerateToken(AppUser user)

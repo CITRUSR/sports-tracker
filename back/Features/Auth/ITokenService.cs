@@ -5,4 +5,5 @@ namespace back.Features.Auth;
 public interface ITokenService
 {
     string GenerateToken(AppUser user);
+    string GenerateRefreshToken();
 }
