@@ -10,16 +10,19 @@ public class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ITokenService _tokenService;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-        ITokenService tokenService)
+        ITokenService tokenService, ILogger<AuthService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
+        _logger = logger;
     }
 
-    public async Task<Result<LoginUserResponse>> LoginAsync(LoginUserDto dto, CancellationToken cancellationToken = default)
+    public async Task<Result<LoginUserResponse>> LoginAsync(LoginUserDto dto, string oldRefreshToken,
+        CancellationToken cancellationToken = default)
     {
         var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Login == dto.Login, cancellationToken);
 
@@ -32,6 +35,17 @@ public class AuthService : IAuthService
 
         var accessToken = _tokenService.GenerateToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
+
+        if (oldRefreshToken != null)
+        {
+            var revokeResult = await _tokenService.RevokeRefreshTokenAsync(oldRefreshToken);
+            if (!revokeResult.IsSuccess)
+                _logger.LogWarning("Failed to revoke existing refresh token from cookies: {Error}, token:{Token}",
+                    revokeResult.ErrorsString, oldRefreshToken);
+        }
+
+        await _tokenService.CreateRefreshTokenAsync(refreshToken, user.Id);
+
         var result = new LoginUserResponse(accessToken, refreshToken);
 
         return Result<LoginUserResponse>.Success(result);

@@ -1,5 +1,7 @@
 using back.Common.Helpers;
 using back.Common.Markers;
+using back.Common.Types;
+using Microsoft.Extensions.Options;
 
 namespace back.Features.Auth;
 
@@ -10,13 +12,25 @@ public class AuthEndpoints : IEndpointMarker
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
-        app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService) =>
+        app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService,
+            IOptions<AppSettings> appSettingsOpt, HttpContext context) =>
         {
-            var result = await authService.LoginAsync(dto);
+            var existingRefreshToken = context.Request.Cookies["refresh-token"];
+
+            var result = await authService.LoginAsync(dto, existingRefreshToken);
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            return Results.Ok(result.Data);
+            context.Response.Cookies.Append("refresh-token", result.Data.RefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                // TODO: make secure
+                Secure = false,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(appSettingsOpt.Value.RefreshTokenLifeTimeInDays),
+            });
+
+            return Results.Ok(result.Data.AccessToken);
         })
         .WithTags(_tag)
         .WithDescription("Login user")
