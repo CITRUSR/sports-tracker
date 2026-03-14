@@ -16,26 +16,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Check existing directories before build
-        run: |
-          echo "Проверяем существующие папки в tests/back.UnitTests до сборки:"
-          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/ || echo "Не удалось найти папки."
-
       - name: Build and test backend
         run: |
-          echo "Собираем проект с подробным выводом..."
-          cd tests/back.UnitTests
           dotnet restore
-          dotnet build --configuration Release --verbosity normal
-
-      - name: Check existing directories after build
-        run: |
-          echo "Проверяем существующие папки в tests/back.UnitTests после сборки:"
-          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/ || echo "Не удалось найти папки."
-
-      - name: Run tests
-        run: |
-          echo "Запуск тестов..."
+          dotnet build --configuration Release
           dotnet test --no-build --configuration Release --verbosity normal
 
       - name: SSH Deploy with Docker Compose
@@ -46,7 +30,6 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            echo "Разворачиваем приложение на сервере..."
             cd ~/sports-tracker
             git pull
             docker compose up frontend-prod backend db -d --build
