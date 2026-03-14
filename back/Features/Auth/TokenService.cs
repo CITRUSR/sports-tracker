@@ -88,7 +88,8 @@ public class TokenService : ITokenService
 
     public async Task<Result<RefreshToken>> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default)
     {
-        var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
+        var refreshToken = await _dbContext.RefreshTokens.Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.Token == token, cancellationToken);
         if (refreshToken == null)
         {
             return Result<RefreshToken>.Failure("Refresh token not found");
