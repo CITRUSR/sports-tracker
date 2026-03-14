@@ -126,7 +126,8 @@ public static class ProgramExtensions
            {
                policy.WithOrigins("http://localhost:5173")
                      .AllowAnyMethod()
-                     .AllowAnyHeader();
+                     .AllowAnyHeader()
+                     .AllowCredentials();
            });
        });
     }
