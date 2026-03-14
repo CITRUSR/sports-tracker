@@ -16,6 +16,10 @@ public class AuthEndpoints : IEndpointMarker
         app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService,
             IOptions<AppSettings> appSettingsOpt, HttpContext context) =>
         {
+            var errors = EndpointHelpers.Validate(dto);
+            if (errors.Any())
+                return Results.BadRequest(errors);
+
             var existingRefreshToken = context.Request.Cookies[_refreshTokenCookieKey];
 
             var result = await authService.LoginAsync(dto, existingRefreshToken);
