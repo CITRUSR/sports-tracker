@@ -16,20 +16,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Check Directory Structure
+      - name: Check Directory Structure (before build)
         run: |
-          echo "Проверяем структуру директорий:"
-          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/bin/
-
-      - name: Check Environment Variables
-        run: |
-          echo "Переменные окружения:"
-          env
-
-      - name: Check .NET SDK Version
-        run: |
-          echo "Проверяем версию .NET SDK:"
-          dotnet --version
+          echo "Проверяем структуру директорий ДО сборки:"
+          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/
 
       - name: Build and test backend
         run: |
@@ -37,6 +27,8 @@ jobs:
           cd tests/back.UnitTests
           dotnet restore
           dotnet build --configuration Release --verbosity detailed
+          echo "Проверяем структуру директорий ПОСЛЕ сборки:"
+          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/bin/
           echo "Запуск тестов с подробным выводом:"
           dotnet test --no-build --verbosity detailed
 
