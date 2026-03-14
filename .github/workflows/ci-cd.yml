@@ -16,21 +16,27 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Check Directory Structure (before build)
+      - name: Check existing directories before build
         run: |
-          echo "Проверяем структуру директорий ДО сборки:"
-          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/
+          echo "Проверяем существующие папки в tests/back.UnitTests до сборки:"
+          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/ || echo "Не удалось найти папки."
 
       - name: Build and test backend
         run: |
-          echo "Собираем проект с подробным выводом:"
+          echo "Собираем проект с подробным выводом..."
           cd tests/back.UnitTests
           dotnet restore
-          dotnet build --configuration Release --verbosity detailed
-          echo "Проверяем структуру директорий ПОСЛЕ сборки:"
-          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/bin/
-          echo "Запуск тестов с подробным выводом:"
-          dotnet test --no-build --verbosity detailed
+          dotnet build --configuration Release --verbosity normal
+
+      - name: Check existing directories after build
+        run: |
+          echo "Проверяем существующие папки в tests/back.UnitTests после сборки:"
+          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/ || echo "Не удалось найти папки."
+
+      - name: Run tests
+        run: |
+          echo "Запуск тестов..."
+          dotnet test --no-build --verbosity normal
 
       - name: SSH Deploy with Docker Compose
         uses: appleboy/ssh-action@v0.1.6
