@@ -36,7 +36,7 @@ jobs:
       - name: Run tests
         run: |
           echo "Запуск тестов..."
-          dotnet test --no-build --verbosity normal
+          dotnet test --no-build --configuration Release --verbosity normal
 
       - name: SSH Deploy with Docker Compose
         uses: appleboy/ssh-action@v0.1.6
