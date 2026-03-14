@@ -18,7 +18,6 @@ jobs:
 
       - name: Build and test backend
         run: |
-          cd back
           dotnet restore
           dotnet build --configuration Release
           dotnet test --no-build --verbosity normal
