@@ -108,5 +108,4 @@ export default {
   healthCheck: () => BaseApi.get('healthcheck'),
   login: (model) => BaseApi.post('auth/login', model),
   refreshToken: () => BaseApi.post('auth/refresh'),
-  test: () => BaseApi.get('test'),
 };
