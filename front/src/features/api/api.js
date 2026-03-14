@@ -1,5 +1,38 @@
 import axios from 'axios';
 import { urls } from './config.js';
+import { authStore } from '../../shared/stores/authStore.js';
+
+axios.defaults.withCredentials = true;
+
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        const refreshResponse = await axios.post(
+          `${urls.api}/auth/refresh`,
+          {}
+        );
+        const token = refreshResponse.data;
+        authStore.setAccessToken(token);
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        originalRequest.headers['Authorization'] = `Bearer ${token}`;
+
+        return axios(originalRequest);
+      } catch (refreshError) {
+        console.error('Token refresh failed', refreshError);
+        throw refreshError;
+      }
+    }
+
+    throw error;
+  }
+);
 
 const errorHandler = (error) => {
   if (error?.response?.status == 400 && error?.response?.data?.message) {
@@ -73,4 +106,7 @@ export default {
   apiUrl: urls.api,
 
   healthCheck: () => BaseApi.get('healthcheck'),
+  login: (model) => BaseApi.post('auth/login', model),
+  refreshToken: () => BaseApi.post('auth/refresh'),
+  test: () => BaseApi.get('test'),
 };
