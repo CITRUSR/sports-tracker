@@ -16,12 +16,29 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Check Directory Structure
+        run: |
+          echo "Проверяем структуру директорий:"
+          ls -R /home/runner/work/sports-tracker/sports-tracker/tests/back.UnitTests/bin/
+
+      - name: Check Environment Variables
+        run: |
+          echo "Переменные окружения:"
+          env
+
+      - name: Check .NET SDK Version
+        run: |
+          echo "Проверяем версию .NET SDK:"
+          dotnet --version
+
       - name: Build and test backend
         run: |
+          echo "Собираем проект с подробным выводом:"
           cd tests/back.UnitTests
           dotnet restore
-          dotnet build --configuration Release
-          dotnet test --no-build --verbosity normal
+          dotnet build --configuration Release --verbosity detailed
+          echo "Запуск тестов с подробным выводом:"
+          dotnet test --no-build --verbosity detailed
 
       - name: SSH Deploy with Docker Compose
         uses: appleboy/ssh-action@v0.1.6
@@ -31,6 +48,7 @@ jobs:
           key: ${{ secrets.SERVER_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
+            echo "Разворачиваем приложение на сервере..."
             cd ~/sports-tracker
             git pull
             docker compose up frontend-prod backend db -d --build
