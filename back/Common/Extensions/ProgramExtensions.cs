@@ -91,6 +91,7 @@ public static class ProgramExtensions
         if (dbContext.Database.GetPendingMigrations().Any())
         {
             dbContext.Database.Migrate();
+            DbInitializer.InitializeAsync(dbContext).Wait();
         }
 
     }
