@@ -1,4 +1,4 @@
-using System.Security.Claims;
+using back.Common.Extensions;
 using back.Common.Helpers;
 using back.Common.Markers;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +19,7 @@ public class ProfileEndpoints : IEndpointMarker
             if (errors.Any())
                 return Results.BadRequest(errors);
 
-            var userId = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userId = context.User.GetId();
 
             var result = await profileService.CreateProfileAsync(userId, dto);
             if (!result.IsSuccess)
@@ -40,7 +40,7 @@ public class ProfileEndpoints : IEndpointMarker
             if (errors.Any())
                 return Results.BadRequest(errors);
 
-            var userId = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userId = context.User.GetId();
 
             var result = await profileService.UpdateProfileAsync(userId, dto);
             if (!result.IsSuccess)
