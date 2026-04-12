@@ -14,7 +14,7 @@ public class ProfileService : IProfileService
         _dbContext = dbContext;
     }
 
-    public async Task<Result> CreateProfileAsync(string userId, CreateProfileDto dto,
+    public async Task<Result> CreateProfileAsync(string userId, ProfileDto dto,
         CancellationToken cancellationToken = default)
     {
         if (!IsBirthDateValid(dto.DateOfBirth))
