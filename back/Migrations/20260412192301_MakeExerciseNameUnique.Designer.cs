@@ -12,8 +12,8 @@ using back.Infrastructure;
 namespace back.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260412191717_addUserIdToExercise")]
-    partial class addUserIdToExercise
+    [Migration("20260412192301_MakeExerciseNameUnique")]
+    partial class MakeExerciseNameUnique
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -248,10 +248,10 @@ namespace back.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
 
                     b.ToTable("Exercises");
                 });

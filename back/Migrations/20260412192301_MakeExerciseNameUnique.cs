@@ -5,7 +5,7 @@
 namespace back.Migrations
 {
     /// <inheritdoc />
-    public partial class addUserIdToExercise : Migration
+    public partial class MakeExerciseNameUnique : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,6 +15,10 @@ namespace back.Migrations
                 table: "Exercises",
                 type: "text",
                 nullable: true);
+
+            migrationBuilder.Sql("""
+                CREATE UNIQUE INDEX "IX_Exercises_Name_UserId" ON "Exercises" (LOWER("Name"), "UserId");
+            """);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Exercises_UserId",
@@ -34,6 +38,10 @@ namespace back.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Exercises_AspNetUsers_UserId",
+                table: "Exercises");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Exercises_Name_UserId",
                 table: "Exercises");
 
             migrationBuilder.DropIndex(

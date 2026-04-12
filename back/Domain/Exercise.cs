@@ -27,6 +27,6 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
 
         builder.Property(x => x.Name).IsRequired();
 
-        builder.HasIndex(x => x.Name).IsUnique();
+        builder.HasIndex(x => new { x.Name, x.UserId }).IsUnique();
     }
 }
