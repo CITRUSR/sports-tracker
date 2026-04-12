@@ -14,7 +14,7 @@ public class ProfileService : IProfileService
         _dbContext = dbContext;
     }
 
-    public async Task<Result> CreateProfileAsync(string userId, ProfileDto dto,
+    public async Task<Result> CreateProfileAsync(string userId, CreateProfileDto dto,
         CancellationToken cancellationToken = default)
     {
         if (!IsBirthDateValid(dto.DateOfBirth))
@@ -38,18 +38,14 @@ public class ProfileService : IProfileService
         return Result.Success();
     }
 
-    public async Task<Result> UpdateProfileAsync(string userId, ProfileDto dto, CancellationToken cancellationToken = default)
+    public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileDto dto, CancellationToken cancellationToken = default)
     {
-        if (!IsBirthDateValid(dto.DateOfBirth))
-            return Result.Failure(ProfileErrors.InvalidBirthDate.ToString());
-
         var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         if (profile == null)
             return Result.Failure(ProfileErrors.ProfileNotFound.ToString());
 
         profile.Name = dto.Name;
         profile.CurrentWeight = dto.CurrentWeight;
-        profile.DateOfBirth = dto.DateOfBirth;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();

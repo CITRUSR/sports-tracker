@@ -12,7 +12,7 @@ public class ProfileEndpoints : IEndpointMarker
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
-        app.MapPost(_baseRoute, async ([FromServices] IProfileService profileService, [FromBody] ProfileDto dto,
+        app.MapPost(_baseRoute, async ([FromServices] IProfileService profileService, [FromBody] CreateProfileDto dto,
             HttpContext context) =>
         {
             var errors = EndpointHelpers.Validate(dto);
@@ -33,7 +33,7 @@ public class ProfileEndpoints : IEndpointMarker
         .Produces(StatusCodes.Status200OK, typeof(string))
         .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>));
 
-        app.MapPut(_baseRoute, async ([FromServices] IProfileService profileService, [FromBody] ProfileDto dto,
+        app.MapPut(_baseRoute, async ([FromServices] IProfileService profileService, [FromBody] UpdateProfileDto dto,
             HttpContext context) =>
         {
             var errors = EndpointHelpers.Validate(dto);
