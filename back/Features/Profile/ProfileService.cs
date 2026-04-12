@@ -38,6 +38,23 @@ public class ProfileService : IProfileService
         return Result.Success();
     }
 
+    public async Task<Result> UpdateProfileAsync(string userId, ProfileDto dto, CancellationToken cancellationToken = default)
+    {
+        if (!IsBirthDateValid(dto.DateOfBirth))
+            return Result.Failure("Invalid birth date.");
+
+        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+        if (profile == null)
+            return Result.Failure("Profile not found.");
+
+        profile.Name = dto.Name;
+        profile.CurrentWeight = dto.CurrentWeight;
+        profile.DateOfBirth = dto.DateOfBirth;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
     private static bool IsBirthDateValid(DateTimeOffset birthDate)
     {
         var now = DateTimeOffset.UtcNow;
