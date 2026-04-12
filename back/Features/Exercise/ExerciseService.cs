@@ -15,18 +15,21 @@ public class ExerciseService : IExerciseService
         _dbContext = dbContext;
     }
 
-    public async Task<Result> CreateExerciseAsync(string name, ExerciseType type, CancellationToken cancellationToken = default)
+    public async Task<Result> CreateExerciseAsync(string name, ExerciseType type, string userId,
+        CancellationToken cancellationToken = default)
     {
         const string errorMessage = "Exercise with same name already exists";
 
-        var isExerciseExists = await _dbContext.Exercises.AnyAsync(e => e.Name.ToLower() == name.ToLower(), cancellationToken);
+        var isExerciseExists = await _dbContext.Exercises.AnyAsync(e => e.Name.ToLower() == name.ToLower()
+            && e.UserId == userId, cancellationToken);
         if (isExerciseExists)
             return Result.Failure(errorMessage);
 
         var exercise = new Domain.Exercise
         {
             Name = name,
-            Type = type
+            Type = type,
+            UserId = userId
         };
 
         await _dbContext.Exercises.AddAsync(exercise, cancellationToken);
