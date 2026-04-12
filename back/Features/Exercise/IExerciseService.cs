@@ -5,6 +5,6 @@ namespace back.Features.Exercise;
 
 public interface IExerciseService
 {
-    Task<Result> CreateExerciseAsync(string name, ExerciseType type, string userId, CancellationToken cancellationToken = default);
+    Task<Result> CreateExerciseAsync(CreateExerciseDto dto, string userId, CancellationToken cancellationToken = default);
     Task<List<ExerciseDto>> GetExercisesAsync(string userId, CancellationToken cancellationToken = default);
 }

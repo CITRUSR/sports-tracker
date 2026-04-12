@@ -1,5 +1,4 @@
 using back.Common.Types;
-using back.Domain;
 using back.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -15,20 +14,20 @@ public class ExerciseService : IExerciseService
         _dbContext = dbContext;
     }
 
-    public async Task<Result> CreateExerciseAsync(string name, ExerciseType type, string userId,
+    public async Task<Result> CreateExerciseAsync(CreateExerciseDto dto, string userId,
         CancellationToken cancellationToken = default)
     {
         const string errorMessage = "Exercise with same name already exists";
 
-        var isExerciseExists = await _dbContext.Exercises.AnyAsync(e => e.Name.ToLower() == name.ToLower()
+        var isExerciseExists = await _dbContext.Exercises.AnyAsync(e => e.Name.ToLower() == dto.Name.ToLower()
             && e.UserId == userId, cancellationToken);
         if (isExerciseExists)
             return Result.Failure(errorMessage);
 
         var exercise = new Domain.Exercise
         {
-            Name = name,
-            Type = type,
+            Name = dto.Name,
+            Type = dto.Type,
             UserId = userId
         };
 
