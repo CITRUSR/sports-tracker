@@ -4,6 +4,7 @@ using back.Common.Markers;
 using back.Common.Types;
 using back.Domain;
 using back.Features.Auth;
+using back.Features.Exercise;
 using back.Features.Profile;
 using back.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -138,6 +139,8 @@ public static class ProgramExtensions
         builder.Services.AddScoped<IAuthService, AuthService>();
 
         builder.Services.AddScoped<IProfileService, ProfileService>();
+
+        builder.Services.AddScoped<IExerciseService, ExerciseService>();
     }
 
     private static void AddJwt(WebApplicationBuilder builder)
