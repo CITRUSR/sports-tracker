@@ -91,9 +91,9 @@ public static class ProgramExtensions
         if (dbContext.Database.GetPendingMigrations().Any())
         {
             dbContext.Database.Migrate();
-            DbInitializer.InitializeAsync(dbContext).Wait();
         }
 
+        DbInitializer.InitializeAsync(dbContext).Wait();
     }
 
     private static void AddSwagger(WebApplicationBuilder builder)
