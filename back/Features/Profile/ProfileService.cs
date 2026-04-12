@@ -18,7 +18,7 @@ public class ProfileService : IProfileService
         CancellationToken cancellationToken = default)
     {
         if (!IsBirthDateValid(dto.DateOfBirth))
-            return Result.Failure(ProfileErrors.InvalidBirthDate.ToString());
+            return Result.Failure("Invalid birth date");
 
         var isProfileExists = await _dbContext.UserProfiles.AnyAsync(p => p.UserId == userId, cancellationToken);
         if (isProfileExists)
@@ -42,7 +42,7 @@ public class ProfileService : IProfileService
     {
         var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
         if (profile == null)
-            return Result.Failure(ProfileErrors.ProfileNotFound.ToString());
+            return Result.Failure("Profile not found");
 
         profile.Name = dto.Name;
         profile.CurrentWeight = dto.CurrentWeight;

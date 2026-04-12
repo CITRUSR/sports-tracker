@@ -44,14 +44,7 @@ public class ProfileEndpoints : IEndpointMarker
 
             var result = await profileService.UpdateProfileAsync(userId, dto);
             if (!result.IsSuccess)
-            {
-                return result.Errors.FirstOrDefault() switch
-                {
-                    nameof(ProfileErrors.InvalidBirthDate) => Results.BadRequest("Age must be between 12 and 120 years"),
-                    nameof(ProfileErrors.ProfileNotFound) => Results.NotFound("Profile not found"),
-                    _ => Results.BadRequest(result.Errors),
-                };
-            }
+                return Results.NotFound(result.Errors);
 
             return Results.Ok();
         })
