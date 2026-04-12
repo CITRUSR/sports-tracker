@@ -8,6 +8,8 @@ public class Exercise
     public int Id { get; set; }
     public string Name { get; set; }
     public ExerciseType Type { get; set; }
+    public string? UserId { get; set; }
+    public AppUser User { get; set; }
 }
 
 public enum ExerciseType
@@ -24,5 +26,7 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Name).IsRequired();
+
+        builder.HasIndex(x => new { x.Name, x.UserId }).IsUnique();
     }
 }
