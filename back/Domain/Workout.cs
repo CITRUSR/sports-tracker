@@ -11,7 +11,7 @@ public class Workout
     public DateOnly Date { get; set; }
     public TimeOnly TimeStart { get; set; }
     public TimeOnly? TimeEnd { get; set; }
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
     public List<ExerciseEntry> ExerciseEntries { get; set; }
 }
 
