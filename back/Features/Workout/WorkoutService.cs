@@ -22,7 +22,7 @@ public class WorkoutService : IWorkoutService
         var workout = new Domain.Workout
         {
             Date = new DateOnly(now.Year, now.Month, now.Day),
-            TimeStart = new TimeOnly(now.Ticks),
+            TimeStart = new TimeOnly(now.Hour, now.Minute, now.Second),
             UserId = userId,
         };
 
@@ -39,7 +39,7 @@ public class WorkoutService : IWorkoutService
             return Result.Failure("No workouts in progress");
 
         var now = DateTimeOffset.UtcNow;
-        activeWorkout.TimeEnd = new TimeOnly(now.Ticks);
+        activeWorkout.TimeEnd = new TimeOnly(now.Hour, now.Minute, now.Second);
         activeWorkout.Comment = comment;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
