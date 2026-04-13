@@ -15,9 +15,7 @@ public class WorkoutService : IWorkoutService
 
     public async Task<Result> BeginAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var isAnotherWorkoutInProgressExists = await _dbContext.Workouts
-            .Where(x => x.UserId == userId && x.TimeEnd == null).AnyAsync(cancellationToken);
-        if (isAnotherWorkoutInProgressExists)
+        if ((await GetActiveWorkoutAsync(userId, cancellationToken)) != null)
             return Result.Failure("Another workout already in progress");
 
         var now = DateTimeOffset.UtcNow;
@@ -32,5 +30,26 @@ public class WorkoutService : IWorkoutService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    public async Task<Result> FinishAsync(string userId, string comment, CancellationToken cancellationToken = default)
+    {
+        var activeWorkout = await GetActiveWorkoutAsync(userId, cancellationToken);
+        if (activeWorkout == null)
+            return Result.Failure("No workouts in progress");
+
+        var now = DateTimeOffset.UtcNow;
+        activeWorkout.TimeEnd = new TimeOnly(now.Ticks);
+        activeWorkout.Comment = comment;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Workouts
+            .Where(x => x.UserId == userId && x.TimeEnd == null).FirstOrDefaultAsync(cancellationToken);
     }
 }
