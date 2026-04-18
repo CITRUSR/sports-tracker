@@ -8,4 +8,5 @@ public class WorkoutDto
     public TimeOnly? TimeEnd { get; set; }
     public string? Comment { get; set; }
     public List<ExerciseDto> Exercises { get; set; } = [];
+    public List<PauseDto> Pauses { get; set; } = [];
 }

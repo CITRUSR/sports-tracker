@@ -80,7 +80,12 @@ public class WorkoutService : IWorkoutService
                 Weight = x.Weight,
                 Name = x.Exercise.Name,
                 Type = x.Exercise.Type,
-            }).ToList()
+            }).ToList(),
+            Pauses = x.Pauses.Select(p => new PauseDto
+            {
+                StartTime = p.StartTime,
+                EndTime = p.EndTime,
+            }).ToList(),
         })
         .OrderByDescending(x => x.Date)
         .ThenByDescending(x => x.TimeEnd)
