@@ -34,7 +34,7 @@ public class WorkoutPauseService : IWorkoutPauseService
         return Result.Success();
     }
 
-    private WorkoutPause GetActivePause(Domain.Workout workout)
+    public WorkoutPause GetActivePause(Domain.Workout workout)
     {
         return workout.Pauses.FirstOrDefault(x => x.EndTime == null);
     }
