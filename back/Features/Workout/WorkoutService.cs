@@ -36,9 +36,13 @@ public class WorkoutService : IWorkoutService
 
     public async Task<Result> FinishAsync(string userId, string comment, CancellationToken cancellationToken = default)
     {
-        var activeWorkout = await GetActiveWorkoutAsync(userId, cancellationToken: cancellationToken);
+        var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken: cancellationToken);
         if (activeWorkout == null)
             return Result.Failure("No workouts in progress");
+
+        var activePause = _pauseService.GetActivePause(activeWorkout);
+        if (activePause != null)
+            _pauseService.Resume(activeWorkout);
 
         var now = DateTimeOffset.UtcNow;
         activeWorkout.TimeEnd = new TimeOnly(now.Hour, now.Minute, now.Second);
