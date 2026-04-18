@@ -7,15 +7,17 @@ namespace back.Features.Workout;
 public class WorkoutService : IWorkoutService
 {
     private readonly IAppDbContext _dbContext;
+    private readonly IWorkoutPauseService _pauseService;
 
-    public WorkoutService(IAppDbContext dbContext)
+    public WorkoutService(IAppDbContext dbContext, IWorkoutPauseService pauseService)
     {
         _dbContext = dbContext;
+        _pauseService = pauseService;
     }
 
     public async Task<Result> BeginAsync(string userId, CancellationToken cancellationToken = default)
     {
-        if ((await GetActiveWorkoutAsync(userId, cancellationToken)) != null)
+        if ((await GetActiveWorkoutAsync(userId, cancellationToken: cancellationToken)) != null)
             return Result.Failure("Another workout already in progress");
 
         var now = DateTimeOffset.UtcNow;
@@ -34,7 +36,7 @@ public class WorkoutService : IWorkoutService
 
     public async Task<Result> FinishAsync(string userId, string comment, CancellationToken cancellationToken = default)
     {
-        var activeWorkout = await GetActiveWorkoutAsync(userId, cancellationToken);
+        var activeWorkout = await GetActiveWorkoutAsync(userId, cancellationToken: cancellationToken);
         if (activeWorkout == null)
             return Result.Failure("No workouts in progress");
 
@@ -83,9 +85,44 @@ public class WorkoutService : IWorkoutService
         return workouts;
     }
 
-    private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<Result> PauseAsync(string userId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Workouts
-            .Where(x => x.UserId == userId && x.TimeEnd == null).FirstOrDefaultAsync(cancellationToken);
+        var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken);
+        if (activeWorkout == null)
+            return Result.Failure("No workouts in progress");
+
+        var pauseResult = _pauseService.Pause(activeWorkout);
+        if (!pauseResult.IsSuccess)
+            return pauseResult;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
+    public async Task<Result> ResumeAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken);
+        if (activeWorkout == null)
+            return Result.Failure("No workouts in progress");
+
+        var resumeResult = _pauseService.Resume(activeWorkout);
+        if (!resumeResult.IsSuccess)
+            return resumeResult;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
+    private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, bool includePauses = false,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _dbContext.Workouts
+            .Where(x => x.UserId == userId && x.TimeEnd == null)
+            .AsNoTracking();
+
+        if (includePauses)
+            query = query.Include(x => x.Pauses);
+
+        return await query.FirstOrDefaultAsync(cancellationToken);
     }
 }
