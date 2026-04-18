@@ -47,6 +47,42 @@ public class WorkoutService : IWorkoutService
         return Result.Success();
     }
 
+    public async Task<List<WorkoutDto>> GetAsync(string userId, WorkoutFilter filter,
+        CancellationToken cancellationToken = default)
+    {
+        var fromDateOnly = new DateOnly(filter.From.Year, filter.From.Month, filter.From.Day);
+        var toDateOnly = new DateOnly(filter.To.Year, filter.To.Month, filter.To.Day);
+
+        var query = _dbContext.Workouts.AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .Where(x => x.Date >= fromDateOnly && x.Date <= toDateOnly);
+
+        if (filter.OnlyWorkoutsWithExerciseId.HasValue)
+            query = query.Where(x => x.ExerciseEntries.Any(e => e.ExerciseId == filter.OnlyWorkoutsWithExerciseId.Value));
+
+        var workouts = await query.Select(x => new WorkoutDto
+        {
+            Comment = x.Comment,
+            Date = x.Date,
+            TimeEnd = x.TimeEnd,
+            TimeStart = x.TimeStart,
+            Exercises = x.ExerciseEntries.Select(x => new ExerciseDto
+            {
+                Id = x.ExerciseId,
+                Distance = x.Distance,
+                Repetitions = x.Repetitions,
+                Weight = x.Weight,
+                Name = x.Exercise.Name,
+                Type = x.Exercise.Type,
+            }).ToList()
+        })
+        .OrderByDescending(x => x.Date)
+        .ThenByDescending(x => x.TimeEnd)
+        .ToListAsync(cancellationToken);
+
+        return workouts;
+    }
+
     private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.Workouts
