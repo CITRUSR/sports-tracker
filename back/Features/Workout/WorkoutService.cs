@@ -6,9 +6,9 @@ namespace back.Features.Workout;
 
 public class WorkoutService : IWorkoutService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IAppDbContext _dbContext;
 
-    public WorkoutService(AppDbContext dbContext)
+    public WorkoutService(IAppDbContext dbContext)
     {
         _dbContext = dbContext;
     }

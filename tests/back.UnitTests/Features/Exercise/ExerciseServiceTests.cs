@@ -118,7 +118,7 @@ public class ExerciseServiceTests
                 Id = 1,
                 Name = "Global Exercise",
                 Type = ExerciseType.Cardio,
-                UserId = null
+                UserId = null,
             },
             new Domain.Exercise
             {
