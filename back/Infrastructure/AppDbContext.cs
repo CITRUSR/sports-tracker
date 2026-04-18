@@ -11,6 +11,7 @@ public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
     public DbSet<UserProfile> UserProfiles { get; set; }
     public DbSet<Workout> Workouts { get; set; }
     public DbSet<Exercise> Exercises { get; set; }
+    public DbSet<WorkoutPause> WorkoutPauses { get; set; }
     public DbSet<ExerciseEntry> ExerciseEntries { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
