@@ -183,8 +183,7 @@ public class WorkoutService : IWorkoutService
         CancellationToken cancellationToken = default)
     {
         var query = _dbContext.Workouts
-            .Where(x => x.UserId == userId && x.TimeEnd == null)
-            .AsNoTracking();
+            .Where(x => x.UserId == userId && x.TimeEnd == null);
 
         if (includePauses)
             query = query.Include(x => x.Pauses);

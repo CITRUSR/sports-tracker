@@ -28,7 +28,7 @@ public class WorkoutEndpoints : IEndpointMarker
         .Produces(StatusCodes.Status409Conflict, typeof(string));
 
         // rpc style because command
-        app.MapPost($"{_baseRoute}/finish", async ([FromServices] IWorkoutService workoutService, [FromBody] string comment,
+        app.MapPost($"{_baseRoute}/finish", async ([FromServices] IWorkoutService workoutService, [FromBody] string? comment,
             HttpContext context) =>
         {
             var userId = context.User.GetId();
