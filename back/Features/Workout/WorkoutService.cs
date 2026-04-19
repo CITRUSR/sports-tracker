@@ -86,6 +86,7 @@ public class WorkoutService : IWorkoutService
                 Weight = x.Weight,
                 Name = x.Exercise.Name,
                 Type = x.Exercise.Type,
+                Duration = x.Duration,
             }).ToList(),
             Pauses = x.Pauses.Select(p => new PauseDto
             {
