@@ -146,6 +146,7 @@ public static class ProgramExtensions
 
         builder.Services.AddScoped<IWorkoutService, WorkoutService>();
         builder.Services.AddSingleton<IWorkoutPauseService, WorkoutPauseService>();
+        builder.Services.AddSingleton<IWorkoutExerciseService, WorkoutExerciseService>();
     }
 
     private static void AddJwt(WebApplicationBuilder builder)
