@@ -5,7 +5,7 @@ namespace back.Features.Workout;
 
 public class WorkoutExerciseService : IWorkoutExerciseService
 {
-    public Result<Guid> AddExerciseEntry(Domain.Workout workout, ExerciseDto exercise, ExerciseEntryDto exerciseEntryDto)
+    public Result<Guid> AddExerciseEntry(Domain.Workout workout, Exercise.ExerciseDto exercise, ExerciseEntryDto exerciseEntryDto)
     {
         var validationResult = ValidateExerciseEntry(exercise, exerciseEntryDto);
         if (!validationResult.IsSuccess)
@@ -38,7 +38,7 @@ public class WorkoutExerciseService : IWorkoutExerciseService
         return Result.Success();
     }
 
-    public Result UpdateExerciseEntry(Domain.Workout workout, Guid entryId, ExerciseDto exercise,
+    public Result UpdateExerciseEntry(Domain.Workout workout, Guid entryId, Exercise.ExerciseDto exercise,
         ExerciseEntryDto exerciseEntryDto)
     {
         var validationResult = ValidateExerciseEntry(exercise, exerciseEntryDto);
@@ -58,7 +58,7 @@ public class WorkoutExerciseService : IWorkoutExerciseService
         return Result.Success();
     }
 
-    private Result ValidateExerciseEntry(ExerciseDto exercise, ExerciseEntryDto dto)
+    private Result ValidateExerciseEntry(Exercise.ExerciseDto exercise, ExerciseEntryDto dto)
     {
         return exercise.Type switch
         {

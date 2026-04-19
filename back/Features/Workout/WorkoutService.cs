@@ -1,4 +1,5 @@
 using back.Common.Types;
+using back.Features.Exercise;
 using back.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,16 @@ public class WorkoutService : IWorkoutService
 {
     private readonly IAppDbContext _dbContext;
     private readonly IWorkoutPauseService _pauseService;
+    private readonly IWorkoutExerciseService _workoutExerciseService;
+    private readonly IExerciseService _exerciseService;
 
-    public WorkoutService(IAppDbContext dbContext, IWorkoutPauseService pauseService)
+    public WorkoutService(IAppDbContext dbContext, IWorkoutPauseService pauseService,
+        IWorkoutExerciseService workoutExerciseService, IExerciseService exerciseService)
     {
         _dbContext = dbContext;
         _pauseService = pauseService;
+        _workoutExerciseService = workoutExerciseService;
+        _exerciseService = exerciseService;
     }
 
     public async Task<Result> BeginAsync(string userId, CancellationToken cancellationToken = default)
@@ -122,6 +128,56 @@ public class WorkoutService : IWorkoutService
         return Result.Success();
     }
 
+    public async Task<Result> RemoveExerciseEntryAsync(string userId, Guid workoutId, Guid entryId,
+        CancellationToken cancellationToken = default)
+    {
+        var workout = await GetWorkoutByIdAsync(workoutId, userId, cancellationToken);
+        if (workout == null)
+            return Result.Failure("Workout not found");
+
+        var removeResult = _workoutExerciseService.RemoveExerciseEntry(workout, entryId);
+        if (!removeResult.IsSuccess)
+            return removeResult;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdateExerciseEntryAsync(string userId, Guid workoutId, Guid entryId,
+        ExerciseEntryDto exerciseEntryDto, CancellationToken cancellationToken = default)
+    {
+        var workoutAndExerciseResult = await GetWorkoutAndExercise(workoutId, exerciseEntryDto.ExerciseId, userId, cancellationToken);
+        if (!workoutAndExerciseResult.IsSuccess)
+            return Result.Failure(workoutAndExerciseResult.ErrorsString);
+
+        var (workout, exercise) = workoutAndExerciseResult.Data;
+        var updateResult = _workoutExerciseService.UpdateExerciseEntry(workout, entryId, exercise, exerciseEntryDto);
+        if (!updateResult.IsSuccess)
+            return updateResult;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> AddExerciseEntryAsync(string userId, Guid workoutId, ExerciseEntryDto exerciseEntryDto,
+        CancellationToken cancellationToken = default)
+    {
+        var workoutAndExerciseResult = await GetWorkoutAndExercise(workoutId, exerciseEntryDto.ExerciseId, userId, cancellationToken);
+        if (!workoutAndExerciseResult.IsSuccess)
+            return Result.Failure(workoutAndExerciseResult.ErrorsString);
+
+        var (workout, exercise) = workoutAndExerciseResult.Data;
+        var addResult = _workoutExerciseService.AddExerciseEntry(workout, exercise, exerciseEntryDto);
+        if (!addResult.IsSuccess)
+            return Result.Failure(addResult.ErrorsString);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
     private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, bool includePauses = false,
         CancellationToken cancellationToken = default)
     {
@@ -133,5 +189,27 @@ public class WorkoutService : IWorkoutService
             query = query.Include(x => x.Pauses);
 
         return await query.FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<Domain.Workout?> GetWorkoutByIdAsync(Guid workoutId, string userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Workouts
+            .Where(x => x.Id == workoutId && x.UserId == userId)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    private async Task<Result<(Domain.Workout? workout, Exercise.ExerciseDto? exercise)>> GetWorkoutAndExercise(Guid workoutId,
+        int exerciseId, string userId, CancellationToken cancellationToken = default)
+    {
+        var workout = await GetWorkoutByIdAsync(workoutId, userId, cancellationToken);
+        if (workout == null)
+            return Result<(Domain.Workout? workout, Exercise.ExerciseDto? exercise)>.Failure("Workout not found");
+
+        var exercise = await _exerciseService.GetExerciseByIdAsync(exerciseId, userId, cancellationToken);
+        if (exercise == null)
+            return Result<(Domain.Workout? workout, Exercise.ExerciseDto? exercise)>.Failure("Exercise not found");
+
+        return Result<(Domain.Workout? workout, Exercise.ExerciseDto? exercise)>.Success((workout, exercise));
     }
 }
