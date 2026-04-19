@@ -7,7 +7,7 @@ public class WorkoutExerciseServiceTests
 {
     private readonly WorkoutExerciseService _service = new();
 
-    private ExerciseDto CreateExercise(ExerciseType type) => new ExerciseDto
+    private back.Features.Exercise.ExerciseDto CreateExercise(ExerciseType type) => new back.Features.Exercise.ExerciseDto
     {
         Type = type,
         Id = 1,

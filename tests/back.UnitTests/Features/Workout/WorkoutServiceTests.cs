@@ -1,5 +1,6 @@
 using back.Common.Types;
 using back.Domain;
+using back.Features.Exercise;
 using back.Features.Workout;
 using back.Infrastructure;
 using MockQueryable.Moq;
@@ -42,14 +43,71 @@ public class WorkoutServiceTests
         return mock;
     }
 
+    private Mock<IExerciseService> CreateExerciseServiceMock(
+        Func<int, back.Features.Exercise.ExerciseDto?>? factory = null)
+    {
+        var mock = new Mock<IExerciseService>();
+
+        mock.Setup(x => x.GetExerciseByIdAsync(
+                It.IsAny<int>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((int id, string _, CancellationToken _) =>
+                factory?.Invoke(id) ?? new back.Features.Exercise.ExerciseDto
+                {
+                    Id = id,
+                    Name = "Test",
+                    Type = ExerciseType.Strength
+                });
+
+        return mock;
+    }
+
+    private Mock<IWorkoutExerciseService> CreateWorkoutExerciseServiceMock(
+        Result<Guid>? addResult = null,
+        Result? updateResult = null,
+        Result? removeResult = null)
+    {
+        var mock = new Mock<IWorkoutExerciseService>();
+
+        mock.Setup(x => x.AddExerciseEntry(
+                It.IsAny<Domain.Workout>(),
+                It.IsAny<back.Features.Exercise.ExerciseDto>(),
+                It.IsAny<ExerciseEntryDto>()))
+            .Returns(addResult ?? Result<Guid>.Success(Guid.NewGuid()));
+
+        mock.Setup(x => x.UpdateExerciseEntry(
+                It.IsAny<Domain.Workout>(),
+                It.IsAny<Guid>(),
+                It.IsAny<back.Features.Exercise.ExerciseDto>(),
+                It.IsAny<ExerciseEntryDto>()))
+            .Returns(updateResult ?? Result.Success());
+
+        mock.Setup(x => x.RemoveExerciseEntry(
+                It.IsAny<Domain.Workout>(),
+                It.IsAny<Guid>()))
+            .Returns(removeResult ?? Result.Success());
+
+        return mock;
+    }
+
     private WorkoutService CreateService(
         List<Domain.Workout>? workouts = null,
-        Mock<IWorkoutPauseService>? pauseMock = null)
+        Mock<IWorkoutPauseService>? pauseMock = null,
+        Mock<IWorkoutExerciseService>? workoutExerciseMock = null,
+        Mock<IExerciseService>? exerciseMock = null)
     {
         pauseMock ??= CreatePauseServiceMock();
+        workoutExerciseMock ??= CreateWorkoutExerciseServiceMock();
+        exerciseMock ??= CreateExerciseServiceMock();
 
         var db = CreateDbContextMock(workouts);
-        return new WorkoutService(db.Object, pauseMock.Object);
+
+        return new WorkoutService(
+            db.Object,
+            pauseMock.Object,
+            workoutExerciseMock.Object,
+            exerciseMock.Object);
     }
 
     // ---------------- BEGIN ----------------
@@ -287,5 +345,278 @@ public class WorkoutServiceTests
         });
 
         Assert.Single(result);
+    }
+
+    // ---------------- Add Exercise Entry ----------------
+
+    [Fact]
+    public async Task AddExerciseEntryAsync_WhenWorkoutNotFound_ReturnsFailure()
+    {
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout>(),
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.AddExerciseEntryAsync(
+            "user1",
+            Guid.NewGuid(),
+            new ExerciseEntryDto { ExerciseId = 1 });
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("Workout not found", result.ErrorsString);
+
+        workoutExerciseMock.Verify(x =>
+            x.AddExerciseEntry(It.IsAny<Domain.Workout>(), It.IsAny<back.Features.Exercise.ExerciseDto>(), It.IsAny<ExerciseEntryDto>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task AddExerciseEntryAsync_WhenExerciseNotFound_ReturnsFailure()
+    {
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1"
+        };
+
+        var exerciseMock = new Mock<IExerciseService>();
+        exerciseMock.Setup(x => x.GetExerciseByIdAsync(
+                It.IsAny<int>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((back.Features.Exercise.ExerciseDto?)null);
+
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            exerciseMock: exerciseMock,
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.AddExerciseEntryAsync(
+            "user1",
+            workout.Id,
+            new ExerciseEntryDto { ExerciseId = 999 });
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("Exercise not found", result.ErrorsString);
+
+        workoutExerciseMock.Verify(x =>
+            x.AddExerciseEntry(It.IsAny<Domain.Workout>(), It.IsAny<back.Features.Exercise.ExerciseDto>(), It.IsAny<ExerciseEntryDto>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task AddExerciseEntryAsync_WhenValid_CallsDomainService()
+    {
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1",
+            ExerciseEntries = new List<ExerciseEntry>()
+        };
+
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            workoutExerciseMock: workoutExerciseMock);
+
+        var dto = new ExerciseEntryDto
+        {
+            ExerciseId = 1,
+            Weight = 10,
+            Repetitions = 10
+        };
+
+        var result = await service.AddExerciseEntryAsync("user1", workout.Id, dto);
+
+        Assert.True(result.IsSuccess);
+
+        workoutExerciseMock.Verify(x =>
+            x.AddExerciseEntry(workout, It.IsAny<back.Features.Exercise.ExerciseDto>(), dto),
+            Times.Once);
+    }
+
+    // ---------------- Update Exercise Entry ----------------
+
+    [Fact]
+    public async Task UpdateExerciseEntryAsync_WhenWorkoutNotFound_ReturnsFailure()
+    {
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout>(),
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.UpdateExerciseEntryAsync(
+            "user1",
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new ExerciseEntryDto { ExerciseId = 1 });
+
+        Assert.False(result.IsSuccess);
+
+        workoutExerciseMock.Verify(x =>
+            x.UpdateExerciseEntry(It.IsAny<Domain.Workout>(), It.IsAny<Guid>(), It.IsAny<back.Features.Exercise.ExerciseDto>(), It.IsAny<ExerciseEntryDto>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateExerciseEntryAsync_WhenEntryNotFound_ReturnsFailure()
+    {
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1",
+            ExerciseEntries = new List<ExerciseEntry>()
+        };
+
+        var workoutExerciseMock = new Mock<IWorkoutExerciseService>();
+        workoutExerciseMock.Setup(x => x.UpdateExerciseEntry(
+                It.IsAny<Domain.Workout>(),
+                It.IsAny<Guid>(),
+                It.IsAny<back.Features.Exercise.ExerciseDto>(),
+                It.IsAny<ExerciseEntryDto>()))
+            .Returns(Result.Failure("Exercise entry not found"));
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.UpdateExerciseEntryAsync(
+            "user1",
+            workout.Id,
+            Guid.NewGuid(),
+            new ExerciseEntryDto { ExerciseId = 1 });
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("Exercise entry not found", result.ErrorsString);
+    }
+
+    [Fact]
+    public async Task UpdateExerciseEntryAsync_WhenValid_CallsDomainService()
+    {
+        var entryId = Guid.NewGuid();
+
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1",
+            ExerciseEntries = new List<ExerciseEntry>
+        {
+            new ExerciseEntry { Id = entryId }
+        }
+        };
+
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            workoutExerciseMock: workoutExerciseMock);
+
+        var dto = new ExerciseEntryDto
+        {
+            ExerciseId = 1,
+            Weight = 20,
+            Repetitions = 15
+        };
+
+        var result = await service.UpdateExerciseEntryAsync(
+            "user1",
+            workout.Id,
+            entryId,
+            dto);
+
+        Assert.True(result.IsSuccess);
+
+        workoutExerciseMock.Verify(x =>
+            x.UpdateExerciseEntry(workout, entryId, It.IsAny<back.Features.Exercise.ExerciseDto>(), dto),
+            Times.Once);
+    }
+
+    // ---------------- Remove Exercise Entry ----------------
+
+    [Fact]
+    public async Task RemoveExerciseEntryAsync_WhenWorkoutNotFound_ReturnsFailure()
+    {
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout>(),
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.RemoveExerciseEntryAsync(
+            "user1",
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        Assert.False(result.IsSuccess);
+
+        workoutExerciseMock.Verify(x =>
+            x.RemoveExerciseEntry(It.IsAny<Domain.Workout>(), It.IsAny<Guid>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task RemoveExerciseEntryAsync_WhenEntryNotFound_ReturnsFailure()
+    {
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1",
+            ExerciseEntries = new List<ExerciseEntry>()
+        };
+
+        var workoutExerciseMock = new Mock<IWorkoutExerciseService>();
+        workoutExerciseMock.Setup(x => x.RemoveExerciseEntry(
+                It.IsAny<Domain.Workout>(),
+                It.IsAny<Guid>()))
+            .Returns(Result.Failure("Exercise entry not found"));
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.RemoveExerciseEntryAsync(
+            "user1",
+            workout.Id,
+            Guid.NewGuid());
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("Exercise entry not found", result.ErrorsString);
+    }
+    [Fact]
+    public async Task RemoveExerciseEntryAsync_WhenValid_CallsDomainService()
+    {
+        var entryId = Guid.NewGuid();
+
+        var workout = new Domain.Workout
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user1",
+            ExerciseEntries = new List<ExerciseEntry>
+        {
+            new ExerciseEntry { Id = entryId }
+        }
+        };
+
+        var workoutExerciseMock = CreateWorkoutExerciseServiceMock();
+
+        var service = CreateService(
+            new List<Domain.Workout> { workout },
+            workoutExerciseMock: workoutExerciseMock);
+
+        var result = await service.RemoveExerciseEntryAsync(
+            "user1",
+            workout.Id,
+            entryId);
+
+        Assert.True(result.IsSuccess);
+
+        workoutExerciseMock.Verify(x =>
+            x.RemoveExerciseEntry(workout, entryId),
+            Times.Once);
     }
 }
