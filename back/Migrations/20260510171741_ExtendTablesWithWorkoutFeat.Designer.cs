@@ -12,8 +12,8 @@ using back.Infrastructure;
 namespace back.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260413073637_MakeWorkoutCommentNullable")]
-    partial class MakeWorkoutCommentNullable
+    [Migration("20260510171741_ExtendTablesWithWorkoutFeat")]
+    partial class ExtendTablesWithWorkoutFeat
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -265,6 +265,9 @@ namespace back.Migrations
                     b.Property<decimal?>("Distance")
                         .HasColumnType("numeric");
 
+                    b.Property<TimeSpan?>("Duration")
+                        .HasColumnType("interval");
+
                     b.Property<int>("ExerciseId")
                         .HasColumnType("integer");
 
@@ -386,6 +389,22 @@ namespace back.Migrations
                     b.ToTable("Workouts");
                 });
 
+            modelBuilder.Entity("back.Domain.WorkoutPause", b =>
+                {
+                    b.Property<Guid>("WorkoutId")
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly?>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("WorkoutId");
+
+                    b.ToTable("WorkoutPauses");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -496,9 +515,22 @@ namespace back.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("back.Domain.WorkoutPause", b =>
+                {
+                    b.HasOne("back.Domain.Workout", "Workout")
+                        .WithMany("Pauses")
+                        .HasForeignKey("WorkoutId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workout");
+                });
+
             modelBuilder.Entity("back.Domain.Workout", b =>
                 {
                     b.Navigation("ExerciseEntries");
+
+                    b.Navigation("Pauses");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,11 +6,25 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace back.Migrations
 {
     /// <inheritdoc />
-    public partial class AddWorkoutPausesTable : Migration
+    public partial class ExtendTablesWithWorkoutFeat : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "Comment",
+                table: "Workouts",
+                type: "text",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "text");
+
+            migrationBuilder.AddColumn<TimeSpan>(
+                name: "Duration",
+                table: "ExerciseEntries",
+                type: "interval",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "WorkoutPauses",
                 columns: table => new
@@ -36,6 +50,20 @@ namespace back.Migrations
         {
             migrationBuilder.DropTable(
                 name: "WorkoutPauses");
+
+            migrationBuilder.DropColumn(
+                name: "Duration",
+                table: "ExerciseEntries");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Comment",
+                table: "Workouts",
+                type: "text",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "text",
+                oldNullable: true);
         }
     }
 }
