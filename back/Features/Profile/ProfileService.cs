@@ -41,6 +41,8 @@ public class ProfileService : IProfileService
             DateOfBirth = dto.DateOfBirth
         };
 
+        await AddWeightHistoryAsync(userId, dto.CurrentWeight, cancellationToken);
+
         await _dbContext.UserProfiles.AddAsync(profile, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -56,6 +58,8 @@ public class ProfileService : IProfileService
         profile.Name = dto.Name;
         profile.CurrentWeight = dto.CurrentWeight;
 
+        await AddWeightHistoryAsync(userId, dto.CurrentWeight, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
@@ -66,5 +70,16 @@ public class ProfileService : IProfileService
 
         return birthDate <= now.AddYears(-12)
             && birthDate > now.AddYears(-120);
+    }
+
+    private async Task AddWeightHistoryAsync(string userId, decimal weight, CancellationToken cancellationToken = default)
+    {
+        var history = new Domain.WeightHistory
+        {
+            UserId = userId,
+            Weight = weight,
+            Date = DateTimeOffset.UtcNow
+        };
+        await _dbContext.WeightHistory.AddAsync(history, cancellationToken);
     }
 }
