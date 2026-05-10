@@ -1,6 +1,7 @@
 using back.Common.Extensions;
 using back.Common.Helpers;
 using back.Common.Markers;
+using back.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace back.Features.Profile;
@@ -12,6 +13,22 @@ public class ProfileEndpoints : IEndpointMarker
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
+        app.MapGet(_baseRoute, async ([FromServices] IProfileService profileService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await profileService.GetProfileAsync(userId);
+            if (!result.IsSuccess)
+                return Results.NotFound(result.Errors);
+
+            return Results.Ok(result.Data);
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Get user profile")
+        .Produces(StatusCodes.Status200OK, typeof(UserProfile))
+        .Produces(StatusCodes.Status404NotFound, typeof(string));
+
         app.MapPost(_baseRoute, async ([FromServices] IProfileService profileService, [FromBody] CreateProfileDto dto,
             HttpContext context) =>
         {
