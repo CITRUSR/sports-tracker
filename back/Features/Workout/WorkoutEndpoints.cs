@@ -44,5 +44,109 @@ public class WorkoutEndpoints : IEndpointMarker
         .WithDescription("Finish workout")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound, typeof(string));
+
+        app.MapPost($"{_baseRoute}/pause", async ([FromServices] IWorkoutService workoutService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.PauseAsync(userId);
+            if (!result.IsSuccess)
+            {
+                if (result.ErrorsString.Contains("already", StringComparison.OrdinalIgnoreCase))
+                    return Results.Conflict(result.ErrorsString);
+                return Results.NotFound(result.ErrorsString);
+            }
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Pause the active workout")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound, typeof(string))
+        .Produces(StatusCodes.Status409Conflict, typeof(string));
+
+        app.MapPost($"{_baseRoute}/resume", async ([FromServices] IWorkoutService workoutService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.ResumeAsync(userId);
+            if (!result.IsSuccess)
+            {
+                if (result.ErrorsString.Contains("not paused", StringComparison.OrdinalIgnoreCase))
+                    return Results.Conflict(result.ErrorsString);
+                return Results.NotFound(result.ErrorsString);
+            }
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Resume the active workout if it was paused")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound, typeof(string))
+        .Produces(StatusCodes.Status409Conflict, typeof(string));
+
+        app.MapPost($"{_baseRoute}/{{workoutId:guid}}/exercise-entries", async (Guid workoutId,
+            [FromBody] ExerciseEntryDto dto, [FromServices] IWorkoutService workoutService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.AddExerciseEntryAsync(userId, workoutId, dto);
+            if (!result.IsSuccess)
+                return MapExerciseEntryError(result.ErrorsString);
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Add an exercise entry to a workout")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest, typeof(string))
+        .Produces(StatusCodes.Status404NotFound, typeof(string));
+
+        app.MapPut($"{_baseRoute}/{{workoutId:guid}}/exercise-entries/{{entryId:guid}}", async (Guid workoutId,
+            Guid entryId, [FromBody] ExerciseEntryDto dto, [FromServices] IWorkoutService workoutService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.UpdateExerciseEntryAsync(userId, workoutId, entryId, dto);
+            if (!result.IsSuccess)
+                return MapExerciseEntryError(result.ErrorsString);
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Update an exercise entry in a workout")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest, typeof(string))
+        .Produces(StatusCodes.Status404NotFound, typeof(string));
+
+        app.MapDelete($"{_baseRoute}/{{workoutId:guid}}/exercise-entries/{{entryId:guid}}", async (Guid workoutId,
+            Guid entryId, [FromServices] IWorkoutService workoutService, HttpContext context) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.RemoveExerciseEntryAsync(userId, workoutId, entryId);
+            if (!result.IsSuccess)
+                return MapExerciseEntryError(result.ErrorsString);
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Remove an exercise entry from a workout")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status400BadRequest, typeof(string))
+        .Produces(StatusCodes.Status404NotFound, typeof(string));
+    }
+
+    private static IResult MapExerciseEntryError(string message)
+    {
+        if (message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            return Results.NotFound(message);
+
+        return Results.BadRequest(message);
     }
 }
