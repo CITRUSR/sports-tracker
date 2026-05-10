@@ -13,12 +13,17 @@ public class ProfileServiceTests
         profiles ??= new List<UserProfile>();
 
         var mockSet = profiles.BuildMockDbSet();
+        var weigthHistoryMockSet = new List<Domain.WeightHistory>().BuildMockDbSet();
 
         var dbContextMock = new Mock<IAppDbContext>();
 
         dbContextMock
             .Setup(x => x.UserProfiles)
             .Returns(mockSet.Object);
+
+        dbContextMock
+            .Setup(x => x.WeightHistory)
+            .Returns(weigthHistoryMockSet.Object);
 
         dbContextMock
             .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
