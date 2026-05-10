@@ -8,11 +8,11 @@ namespace back.Features.WeightHistory;
 
 public class WeightHistoryService : IWeightHistoryService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly IAppDbContext _dbContext;
     private readonly IProfileService _profileService;
 
     public WeightHistoryService(
-        AppDbContext dbContext,
+        IAppDbContext dbContext,
         IProfileService profileService)
     {
         _dbContext = dbContext;
@@ -22,7 +22,7 @@ public class WeightHistoryService : IWeightHistoryService
     public async Task<Result> AddAsync(string userId, WeightHistoryDto dto, CancellationToken cancellationToken = default)
     {
         await using var transaction =
-            await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+            await _dbContext.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
         var entry = new Domain.WeightHistory
         {
@@ -50,7 +50,7 @@ public class WeightHistoryService : IWeightHistoryService
         CancellationToken cancellationToken = default)
     {
         await using var transaction =
-          await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+          await _dbContext.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
         var entry = await _dbContext.WeightHistory
             .FirstOrDefaultAsync(
@@ -82,7 +82,7 @@ public class WeightHistoryService : IWeightHistoryService
         CancellationToken cancellationToken = default)
     {
         await using var transaction =
-                   await _dbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
+                   await _dbContext.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
 
         var entry = await _dbContext.WeightHistory
             .FirstOrDefaultAsync(
@@ -154,7 +154,7 @@ public class WeightHistoryService : IWeightHistoryService
         if (!profileResult.IsSuccess)
             return Result.Failure(profileResult.ErrorsString);
 
-        _dbContext.Attach(profileResult.Data);
+        _dbContext.UserProfiles.Attach(profileResult.Data);
         profileResult.Data.CurrentWeight = latestEntry!.Weight;
 
         return Result.Success();
