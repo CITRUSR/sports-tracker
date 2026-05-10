@@ -1,7 +1,9 @@
+using System.Data;
 using System.Reflection;
 using back.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace back.Infrastructure;
 
@@ -24,5 +26,15 @@ public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+
+    public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
+    {
+        return await Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        await Database.CommitTransactionAsync(cancellationToken);
     }
 }

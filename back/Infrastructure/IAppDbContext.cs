@@ -1,5 +1,7 @@
+using System.Data;
 using back.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace back.Infrastructure;
 
@@ -14,4 +16,7 @@ public interface IAppDbContext
     DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    public Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+        CancellationToken cancellationToken = default);
+    public Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 }

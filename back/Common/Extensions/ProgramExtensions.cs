@@ -6,6 +6,7 @@ using back.Domain;
 using back.Features.Auth;
 using back.Features.Exercise;
 using back.Features.Profile;
+using back.Features.WeightHistory;
 using back.Features.Workout;
 using back.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -147,6 +148,8 @@ public static class ProgramExtensions
         builder.Services.AddScoped<IWorkoutService, WorkoutService>();
         builder.Services.AddSingleton<IWorkoutPauseService, WorkoutPauseService>();
         builder.Services.AddSingleton<IWorkoutExerciseService, WorkoutExerciseService>();
+
+        builder.Services.AddScoped<IWeightHistoryService, WeightHistoryService>();
     }
 
     private static void AddJwt(WebApplicationBuilder builder)
