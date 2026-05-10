@@ -46,6 +46,19 @@ public class ExerciseService : IExerciseService
         return Result.Success();
     }
 
+    public async Task<ExerciseDto> GetExerciseByIdAsync(int id, string userId, CancellationToken cancellationToken = default)
+    {
+        var exercise = await _dbContext.Exercises.Where(x => x.Id == id && (x.UserId == null || x.UserId == userId))
+            .Select(x => new ExerciseDto
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Type = x.Type
+            }).FirstOrDefaultAsync(cancellationToken);
+
+        return exercise;
+    }
+
     public async Task<List<ExerciseDto>> GetExercisesAsync(string userId, CancellationToken cancellationToken = default)
     {
         var exercises = await _dbContext.Exercises.Where(x => x.UserId == null || x.UserId == userId)

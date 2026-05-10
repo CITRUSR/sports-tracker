@@ -118,7 +118,7 @@ public class ExerciseServiceTests
                 Id = 1,
                 Name = "Global Exercise",
                 Type = ExerciseType.Cardio,
-                UserId = null
+                UserId = null,
             },
             new Domain.Exercise
             {
@@ -144,5 +144,84 @@ public class ExerciseServiceTests
         Assert.Contains(result, x => x.Name == "Global Exercise");
         Assert.Contains(result, x => x.Name == "User Exercise");
         Assert.DoesNotContain(result, x => x.Name == "Other User Exercise");
+    }
+
+    [Fact]
+    public async Task GetExerciseByIdAsync_WhenExerciseExistsForUser_ReturnsExercise()
+    {
+        var exercises = new List<Domain.Exercise>
+    {
+        new Domain.Exercise
+        {
+            Id = 1,
+            Name = "Push Up",
+            Type = ExerciseType.Strength,
+            UserId = "user1"
+        }
+    };
+
+        var service = CreateService(exercises);
+
+        var result = await service.GetExerciseByIdAsync(1, "user1");
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result.Id);
+        Assert.Equal("Push Up", result.Name);
+        Assert.Equal(ExerciseType.Strength, result.Type);
+    }
+
+    [Fact]
+    public async Task GetExerciseByIdAsync_WhenExerciseIsGlobal_ReturnsExercise()
+    {
+        var exercises = new List<Domain.Exercise>
+    {
+        new Domain.Exercise
+        {
+            Id = 1,
+            Name = "Running",
+            Type = ExerciseType.Cardio,
+            UserId = null
+        }
+    };
+
+        var service = CreateService(exercises);
+
+        var result = await service.GetExerciseByIdAsync(1, "user1");
+
+        Assert.NotNull(result);
+        Assert.Equal("Running", result.Name);
+    }
+
+    [Fact]
+    public async Task GetExerciseByIdAsync_WhenExerciseBelongsToAnotherUser_ReturnsNull()
+    {
+        var exercises = new List<Domain.Exercise>
+    {
+        new Domain.Exercise
+        {
+            Id = 1,
+            Name = "Bench Press",
+            Type = ExerciseType.Strength,
+            UserId = "user2"
+        }
+    };
+
+        var service = CreateService(exercises);
+
+        var result = await service.GetExerciseByIdAsync(1, "user1");
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetExerciseByIdAsync_WhenExerciseDoesNotExist_ReturnsNull()
+    {
+        var exercises = new List<Domain.Exercise>();
+
+        var service = CreateService(exercises);
+
+        var result = await service.GetExerciseByIdAsync(999, "user1");
+
+        Assert.Null(result);
     }
 }

@@ -14,6 +14,15 @@ public class ProfileService : IProfileService
         _dbContext = dbContext;
     }
 
+    public async Task<Result<UserProfile>> GetProfileAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var profile = await _dbContext.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId, cancellationToken);
+        if (profile == null)
+            return Result<UserProfile>.Failure("Profile not found");
+
+        return Result<UserProfile>.Success(profile);
+    }
+
     public async Task<Result> CreateProfileAsync(string userId, CreateProfileDto dto,
         CancellationToken cancellationToken = default)
     {

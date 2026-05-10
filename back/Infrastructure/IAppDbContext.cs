@@ -8,6 +8,7 @@ public interface IAppDbContext
     DbSet<WeightHistory> WeightHistory { get; set; }
     DbSet<UserProfile> UserProfiles { get; set; }
     DbSet<Workout> Workouts { get; set; }
+    DbSet<WorkoutPause> WorkoutPauses { get; set; }
     DbSet<Exercise> Exercises { get; set; }
     DbSet<ExerciseEntry> ExerciseEntries { get; set; }
     DbSet<RefreshToken> RefreshTokens { get; set; }
