@@ -38,8 +38,12 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000;
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_SERVICE_NAME=sports_tracker_backend
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=docker
     depends_on:
       - db
+      - otel-collector
   db:
     image: postgres:18
     networks:
@@ -59,9 +63,59 @@ services:
       timeout: 5s
       retries: 5
 
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel/config.yml"]
+    networks:
+      - local
+    volumes:
+      - ./collector-config.yml:/etc/otel/config.yml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    depends_on:
+      - loki
+
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      - local
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports: 
+      - "9090:9090"
+
+  loki:
+    image: grafana/loki:latest
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - local
+    ports: 
+      - "3100:3100"
+
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - local
+    ports: 
+      - "3200:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - loki
+      - prometheus
+
 networks:
   local:
     driver: bridge
 
 volumes:
   db_data:
+  grafana_data:
+  prometheus_data:
