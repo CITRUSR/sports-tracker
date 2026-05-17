@@ -16,6 +16,11 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.*" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.*" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.*" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="0.5.*" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
   </ItemGroup>
 
 </Project>

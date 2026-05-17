@@ -14,6 +14,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 
 namespace back.Common.Extensions;
 
@@ -27,6 +31,8 @@ public static class ProgramExtensions
         ConfigureDb(builder, builder.Configuration);
         AddServices(builder);
         AddJwt(builder);
+
+        AddLogsAndMetrics(builder);
 
         return builder;
     }
@@ -176,5 +182,39 @@ public static class ProgramExtensions
         builder.Services.AddAuthorization();
 
         builder.Services.AddScoped<ITokenService, TokenService>();
+    }
+
+    private static void AddLogsAndMetrics(WebApplicationBuilder builder)
+    {
+        var otelEndpoint = Environment.GetEnvironmentVariable(
+            "OTEL_EXPORTER_OTLP_ENDPOINT")
+            ?? "http://localhost:4317";
+        var serviceName = Environment.GetEnvironmentVariable(
+            "OTEL_SERVICE_NAME") ?? "myapp";
+
+        builder.Services.AddOpenTelemetry()
+            .ConfigureResource(r => r
+            .AddService(serviceName)
+            .AddEnvironmentVariableDetector())
+            .WithMetrics(m => m
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddMeter("SportsTracker.App")
+                .AddOtlpExporter(o =>
+                {
+                    o.Endpoint = new Uri(otelEndpoint);
+                }));
+
+        builder.Logging.AddOpenTelemetry(options =>
+        {
+            options.IncludeScopes = true;
+            options.IncludeFormattedMessage = true;
+            options.AddOtlpExporter(o =>
+            {
+                o.Endpoint = new Uri(otelEndpoint);
+                o.Protocol = OtlpExportProtocol.Grpc;
+            });
+        });
     }
 }
