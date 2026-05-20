@@ -174,6 +174,10 @@ public class WorkoutService : IWorkoutService
         if (!addResult.IsSuccess)
             return Result.Failure(addResult.ErrorsString);
 
+        // TODO: make normal
+        var added = workout.ExerciseEntries.First(x => x.Id == addResult.Data);
+        _dbContext.ExerciseEntries.Entry(added).State = EntityState.Added;
+
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
@@ -195,6 +199,7 @@ public class WorkoutService : IWorkoutService
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.Workouts
+            .Include(x => x.ExerciseEntries)
             .Where(x => x.Id == workoutId && x.UserId == userId)
             .FirstOrDefaultAsync(cancellationToken);
     }

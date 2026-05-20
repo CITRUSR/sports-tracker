@@ -61,6 +61,7 @@ public class AuthService : IAuthService
         var user = new AppUser
         {
             Login = dto.Login,
+            UserName = dto.Login,
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
