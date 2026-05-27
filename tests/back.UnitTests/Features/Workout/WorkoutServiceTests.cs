@@ -3,6 +3,7 @@ using back.Domain;
 using back.Features.Exercise;
 using back.Features.Workout;
 using back.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 
@@ -10,16 +11,30 @@ namespace back.UnitTests.Features.Workout;
 
 public class WorkoutServiceTests
 {
-    private Mock<IAppDbContext> CreateDbContextMock(List<Domain.Workout>? workouts = null)
+    private Mock<IAppDbContext> CreateDbContextMock(
+        List<Domain.Workout>? workouts = null,
+        List<ExerciseEntry>? exerciseEntries = null)
     {
         workouts ??= new List<Domain.Workout>();
+        exerciseEntries ??= new List<ExerciseEntry>();
 
         var mockSet = workouts.BuildMockDbSet();
+        var exerciseEntriesMock = exerciseEntries.BuildMockDbSet();
+
+        var entryContextOptions = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        var entryContext = new AppDbContext(entryContextOptions);
+        exerciseEntriesMock.Setup(x => x.Entry(It.IsAny<ExerciseEntry>()))
+            .Returns((ExerciseEntry entity) => entryContext.ExerciseEntries.Entry(entity));
 
         var mock = new Mock<IAppDbContext>();
 
         mock.Setup(x => x.Workouts)
             .Returns(mockSet.Object);
+
+        mock.Setup(x => x.ExerciseEntries)
+            .Returns(exerciseEntriesMock.Object);
 
         mock.Setup(x => x.Workouts.AddAsync(It.IsAny<Domain.Workout>(), It.IsAny<CancellationToken>()))
             .Callback<Domain.Workout, CancellationToken>((w, _) => workouts.Add(w));
@@ -74,7 +89,25 @@ public class WorkoutServiceTests
                 It.IsAny<Domain.Workout>(),
                 It.IsAny<back.Features.Exercise.ExerciseDto>(),
                 It.IsAny<ExerciseEntryDto>()))
-            .Returns(addResult ?? Result<Guid>.Success(Guid.NewGuid()));
+            .Returns((Domain.Workout workout, back.Features.Exercise.ExerciseDto _, ExerciseEntryDto dto) =>
+            {
+                if (addResult != null && !addResult.IsSuccess)
+                    return addResult;
+
+                var entryId = addResult?.Data ?? Guid.NewGuid();
+                workout.ExerciseEntries.Add(new ExerciseEntry
+                {
+                    Id = entryId,
+                    ExerciseId = dto.ExerciseId,
+                    Weight = dto.Weight,
+                    Distance = dto.Distance,
+                    Repetitions = dto.Repetitions,
+                    Duration = dto.Duration,
+                    WorkoutId = workout.Id
+                });
+
+                return Result<Guid>.Success(entryId);
+            });
 
         mock.Setup(x => x.UpdateExerciseEntry(
                 It.IsAny<Domain.Workout>(),
