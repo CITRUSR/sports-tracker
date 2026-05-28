@@ -11,6 +11,8 @@ services:
     networks:
       - local
     restart: unless-stopped
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
   frontend:
