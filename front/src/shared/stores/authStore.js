@@ -4,6 +4,7 @@ import api from '../../features/api/api';
 class AuthStore {
   accessToken = null;
   isAuthenticated = false;
+  isInitialized = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -16,15 +17,16 @@ class AuthStore {
 
   init = async () => {
     try {
-      const token = await api.refreshToken();
-      this.setAccessToken(token);
+      await api.refreshToken();
     } catch {
-      this.setAccessToken(null);
+      api.clearAuth();
+    } finally {
+      this.isInitialized = true;
     }
   };
 
   logout = () => {
-    this.setAccessToken(null);
+    api.clearAuth();
   };
 }
 
