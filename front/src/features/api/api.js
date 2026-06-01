@@ -106,6 +106,12 @@ export default {
   apiUrl: urls.api,
 
   healthCheck: () => BaseApi.get('healthcheck'),
-  login: (model) => BaseApi.post('auth/login', model),
+  login: async (model) => {
+    const token = await BaseApi.post('auth/login', model);
+    authStore.setAccessToken(token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    return token;
+  },
+  register: (model) => BaseApi.post('auth/register', model),
   refreshToken: () => BaseApi.post('auth/refresh'),
 };
