@@ -6,6 +6,7 @@ function Input({
   type = 'text',
   value,
   onChange,
+  onBlur,
   placeholder,
   error,
   required = false,
@@ -24,6 +25,7 @@ function Input({
         type={type}
         value={value}
         onChange={onChange}
+        onBlur={onBlur}
         placeholder={placeholder}
         required={required}
         autoComplete={autoComplete}
