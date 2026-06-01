@@ -14,7 +14,7 @@ public class AuthEndpoints : IEndpointMarker
     public void MapEndpoints(RouteGroupBuilder app)
     {
         app.MapPost($"{_baseRoute}/login", async (LoginUserDto dto, IAuthService authService,
-            IOptions<AppSettings> appSettingsOpt, HttpContext context) =>
+            IOptions<AppSettings> appSettingsOpt, IWebHostEnvironment env, HttpContext context) =>
         {
             var errors = EndpointHelpers.Validate(dto);
             if (errors.Any())
@@ -26,7 +26,7 @@ public class AuthEndpoints : IEndpointMarker
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context);
+            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context, env);
 
             return Results.Ok(result.Data.AccessToken);
         })
@@ -57,7 +57,7 @@ public class AuthEndpoints : IEndpointMarker
         .Produces(StatusCodes.Status400BadRequest, typeof(IEnumerable<string>));
 
         app.MapPost($"{_baseRoute}/refresh", async (HttpContext context, ITokenService tokenService,
-            IOptions<AppSettings> appSettingsOpt) =>
+            IOptions<AppSettings> appSettingsOpt, IWebHostEnvironment env) =>
         {
             var existingRefreshToken = context.Request.Cookies[_refreshTokenCookieKey];
 
@@ -65,7 +65,7 @@ public class AuthEndpoints : IEndpointMarker
             if (!result.IsSuccess)
                 return Results.BadRequest(result.Errors);
 
-            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context);
+            AddRefreshTokenToCookie(result.Data.RefreshToken, appSettingsOpt.Value.RefreshTokenLifeTimeInDays, context, env);
 
             return Results.Ok(result.Data.AccessToken);
         })
@@ -77,13 +77,12 @@ public class AuthEndpoints : IEndpointMarker
     }
 
     private static void AddRefreshTokenToCookie(string refreshToken, int refreshTokenLifeTimeInDays,
-        HttpContext httpContext)
+        HttpContext httpContext, IWebHostEnvironment env)
     {
         httpContext.Response.Cookies.Append(_refreshTokenCookieKey, refreshToken, new CookieOptions
         {
             HttpOnly = true,
-            // TODO: make secure
-            Secure = false,
+            Secure = !env.IsDevelopment(),
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddDays(refreshTokenLifeTimeInDays),
         });
