@@ -1,6 +1,7 @@
 import Home from '../features/home/HomePage';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
+import NotFoundPage from '../features/notFound/NotFoundPage';
 import { ROUTE_ACCESS } from '../constants/routeAccess';
 import { ROUTES } from '../constants/routes';
 import DefaultLayout from '../shared/layouts/defaultLayout/DefaultLayout';
@@ -30,5 +31,10 @@ export const routes = [
         element: <RegisterPage />,
       },
     ],
+  },
+  {
+    path: ROUTES.NOT_FOUND,
+    access: ROUTE_ACCESS.PUBLIC,
+    element: <NotFoundPage />,
   },
 ];
