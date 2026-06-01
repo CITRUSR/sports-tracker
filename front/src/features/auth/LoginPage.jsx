@@ -3,14 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
 import api from '../api/api';
+import { getAuthErrorMessage } from './getAuthErrorMessage';
 import styles from './AuthPage.module.css';
-
-function getErrorMessage(error) {
-  const data = error?.response?.data;
-  if (Array.isArray(data)) return data.join(', ');
-  if (typeof data === 'string') return data;
-  return 'Something went wrong. Please try again.';
-}
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -28,7 +22,7 @@ function LoginPage() {
       await api.login({ login, password });
       navigate('/');
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getAuthErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -36,25 +30,25 @@ function LoginPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Sign in</h1>
+      <h1 className={styles.title}>Вход</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <Input
           id="login"
-          label="Login"
+          label="Логин"
           value={login}
           onChange={(e) => setLogin(e.target.value)}
-          placeholder="Enter your login"
+          placeholder="Введите логин"
           autoComplete="username"
           required
         />
         <Input
           id="password"
-          label="Password"
+          label="Пароль"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password"
+          placeholder="Введите пароль"
           autoComplete="current-password"
           required
         />
@@ -62,14 +56,14 @@ function LoginPage() {
         {error && <p className={styles.formError}>{error}</p>}
 
         <Button type="submit" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? 'Вход...' : 'Войти'}
         </Button>
       </form>
 
       <p className={styles.footer}>
-        Don&apos;t have an account?{' '}
+        Нет аккаунта?{' '}
         <Link className={styles.link} to="/register">
-          Create one
+          Зарегистрироваться
         </Link>
       </p>
     </div>

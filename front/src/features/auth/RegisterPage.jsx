@@ -3,29 +3,53 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
 import api from '../api/api';
+import { getAuthErrorMessage } from './getAuthErrorMessage';
+import {
+  getPasswordValidationError,
+  PASSWORD_REQUIREMENTS_HINT,
+} from './passwordValidation';
 import styles from './AuthPage.module.css';
-
-function getErrorMessage(error) {
-  const data = error?.response?.data;
-  if (Array.isArray(data)) return data.join(', ');
-  if (typeof data === 'string') return data;
-  return 'Something went wrong. Please try again.';
-}
 
 function RegisterPage() {
   const navigate = useNavigate();
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePasswordBlur = () => {
+    if (!password) {
+      setPasswordError('');
+      return;
+    }
+    setPasswordError(getPasswordValidationError(password));
+  };
+
+  const handleConfirmPasswordBlur = () => {
+    if (!confirmPassword) {
+      setConfirmPasswordError('');
+      return;
+    }
+    setConfirmPasswordError(
+      password !== confirmPassword ? 'Пароли не совпадают' : ''
+    );
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
 
+    const passwordValidationError = getPasswordValidationError(password);
+    if (passwordValidationError) {
+      setPasswordError(passwordValidationError);
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setConfirmPasswordError('Пароли не совпадают');
       return;
     }
 
@@ -35,7 +59,7 @@ function RegisterPage() {
       await api.register({ login, password, confirmPassword });
       navigate('/login');
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getAuthErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -43,51 +67,65 @@ function RegisterPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Create account</h1>
-      <p className={styles.subtitle}>Start tracking your workouts today.</p>
+      <h1 className={styles.title}>Регистрация</h1>
 
       <form className={styles.form} onSubmit={handleSubmit}>
         <Input
           id="login"
-          label="Login"
+          label="Логин"
           value={login}
           onChange={(e) => setLogin(e.target.value)}
-          placeholder="Choose a login"
+          placeholder="Придумайте логин"
           autoComplete="username"
           required
         />
-        <Input
-          id="password"
-          label="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Create a password"
-          autoComplete="new-password"
-          required
-        />
+        <div>
+          <Input
+            id="password"
+            label="Пароль"
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (passwordError) setPasswordError('');
+            }}
+            onBlur={handlePasswordBlur}
+            placeholder="Придумайте пароль"
+            autoComplete="new-password"
+            error={passwordError}
+            required
+          />
+          {!passwordError && (
+            <p className={styles.hint}>{PASSWORD_REQUIREMENTS_HINT}</p>
+          )}
+        </div>
         <Input
           id="confirmPassword"
-          label="Confirm password"
+          label="Подтверждение пароля"
           type="password"
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Repeat your password"
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            if (confirmPasswordError) setConfirmPasswordError('');
+          }}
+          onBlur={handleConfirmPasswordBlur}
+          placeholder="Повторите пароль"
           autoComplete="new-password"
+          error={confirmPasswordError}
           required
         />
 
         {error && <p className={styles.formError}>{error}</p>}
 
         <Button type="submit" fullWidth disabled={isSubmitting}>
-          {isSubmitting ? 'Creating account...' : 'Create account'}
+          {isSubmitting ? 'Создание аккаунта...' : 'Создать аккаунт'}
         </Button>
       </form>
 
       <p className={styles.footer}>
-        Already have an account?{' '}
+        Уже есть аккаунт?{' '}
         <Link className={styles.link} to="/login">
-          Sign in
+          Войти
         </Link>
       </p>
     </div>
