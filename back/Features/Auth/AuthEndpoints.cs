@@ -83,7 +83,8 @@ public class AuthEndpoints : IEndpointMarker
         {
             HttpOnly = true,
             Secure = !env.IsDevelopment(),
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
             Expires = DateTime.UtcNow.AddDays(refreshTokenLifeTimeInDays),
         });
     }

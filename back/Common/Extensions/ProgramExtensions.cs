@@ -10,6 +10,7 @@ using back.Features.WeightHistory;
 using back.Features.Workout;
 using back.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,7 @@ public static class ProgramExtensions
     public static WebApplicationBuilder ConfigureServices(this WebApplicationBuilder builder)
     {
         builder.Services.Configure<AppSettings>(builder.Configuration);
+        ConfigureForwardedHeaders(builder);
         AddSwagger(builder);
         ConfigureCors(builder);
         ConfigureDb(builder, builder.Configuration);
@@ -44,6 +46,7 @@ public static class ProgramExtensions
             app.MapOpenApi();
         }
 
+        app.UseForwardedHeaders();
         app.UseCors("default");
 
         app.UseHttpsRedirection();
@@ -127,6 +130,16 @@ public static class ProgramExtensions
     {
         app.UseSwagger();
         app.UseSwaggerUI();
+    }
+
+    private static void ConfigureForwardedHeaders(WebApplicationBuilder builder)
+    {
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
     }
 
     private static void ConfigureCors(WebApplicationBuilder builder)
