@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
@@ -9,6 +9,8 @@ import styles from './AuthPage.module.css';
 
 function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname ?? ROUTES.HOME;
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,7 +23,7 @@ function LoginPage() {
 
     try {
       await api.login({ login, password });
-      navigate(ROUTES.HOME);
+      navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
