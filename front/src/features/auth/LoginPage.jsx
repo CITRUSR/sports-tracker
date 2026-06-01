@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
+import PasswordInput from '../../shared/components/passwordInput/PasswordInput';
 import api from '../api/api';
 import { getAuthErrorMessage } from './getAuthErrorMessage';
 import styles from './AuthPage.module.css';
@@ -45,10 +46,9 @@ function LoginPage() {
           autoComplete="username"
           required
         />
-        <Input
+        <PasswordInput
           id="password"
           label="Пароль"
-          type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Введите пароль"

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
+import PasswordInput from '../../shared/components/passwordInput/PasswordInput';
 import api from '../api/api';
 import { getAuthErrorMessage } from './getAuthErrorMessage';
 import {
@@ -81,10 +82,9 @@ function RegisterPage() {
           required
         />
         <div>
-          <Input
+          <PasswordInput
             id="password"
             label="Пароль"
-            type="password"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -100,10 +100,9 @@ function RegisterPage() {
             <p className={styles.hint}>{PASSWORD_REQUIREMENTS_HINT}</p>
           )}
         </div>
-        <Input
+        <PasswordInput
           id="confirmPassword"
           label="Подтверждение пароля"
-          type="password"
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
