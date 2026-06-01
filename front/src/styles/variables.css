@@ -1,3 +1,23 @@
-:root{
-    --primary-color: #4CAF50;
+:root {
+  --color-primary: #2563eb;
+  --color-primary-purple: #9333ea;
+  --color-gradient: linear-gradient(90deg, var(--color-primary), var(--color-primary-purple));
+
+  --color-bg: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-border: #e5e7eb;
+
+  --color-text: #111827;
+  --color-text-secondary: #6b7280;
+
+  --color-accent-blue-bg: #dbeafe;
+  --color-accent-blue: #2563eb;
+  --color-accent-green-bg: #dcfce7;
+  --color-accent-green: #16a34a;
+  --color-accent-purple-bg: #f3e8ff;
+  --color-accent-purple: #9333ea;
+  --color-accent-orange-bg: #ffedd5;
+  --color-accent-orange: #ea580c;
+
+  --primary-color: var(--color-primary);
 }
