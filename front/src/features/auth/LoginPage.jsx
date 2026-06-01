@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
 import Button from '../../shared/components/button/Button';
 import Input from '../../shared/components/input/Input';
 import api from '../api/api';
@@ -20,7 +21,7 @@ function LoginPage() {
 
     try {
       await api.login({ login, password });
-      navigate('/');
+      navigate(ROUTES.HOME);
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {
@@ -62,7 +63,7 @@ function LoginPage() {
 
       <p className={styles.footer}>
         Нет аккаунта?{' '}
-        <Link className={styles.link} to="/register">
+        <Link className={styles.link} to={ROUTES.REGISTER}>
           Зарегистрироваться
         </Link>
       </p>
