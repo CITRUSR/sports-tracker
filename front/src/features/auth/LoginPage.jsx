@@ -1,0 +1,76 @@
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
+import Button from '../../shared/components/button/Button';
+import Input from '../../shared/components/input/Input';
+import PasswordInput from '../../shared/components/passwordInput/PasswordInput';
+import api from '../api/api';
+import { getAuthErrorMessage } from './getAuthErrorMessage';
+import styles from './AuthPage.module.css';
+
+function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname ?? ROUTES.HOME;
+  const [login, setLogin] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      await api.login({ login, password });
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.page}>
+      <h1 className={styles.title}>Вход</h1>
+
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <Input
+          id="login"
+          label="Логин"
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          placeholder="Введите логин"
+          autoComplete="username"
+          required
+        />
+        <PasswordInput
+          id="password"
+          label="Пароль"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Введите пароль"
+          autoComplete="current-password"
+          required
+        />
+
+        {error && <p className={styles.formError}>{error}</p>}
+
+        <Button type="submit" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Вход...' : 'Войти'}
+        </Button>
+      </form>
+
+      <p className={styles.footer}>
+        Нет аккаунта?{' '}
+        <Link className={styles.link} to={ROUTES.REGISTER}>
+          Зарегистрироваться
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+export default LoginPage;

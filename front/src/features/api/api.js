@@ -18,9 +18,7 @@ axios.interceptors.response.use(
           {}
         );
         const token = refreshResponse.data;
-        authStore.setAccessToken(token);
-
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        applyAuthToken(token);
         originalRequest.headers['Authorization'] = `Bearer ${token}`;
 
         return axios(originalRequest);
@@ -51,6 +49,16 @@ const getUrl = (endpoint) => {
     return endpoint;
   } else {
     return `${urls.api}/${endpoint}`;
+  }
+};
+
+const applyAuthToken = (token) => {
+  if (token) {
+    authStore.setAccessToken(token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    authStore.setAccessToken(null);
+    delete axios.defaults.headers.common['Authorization'];
   }
 };
 
@@ -106,6 +114,16 @@ export default {
   apiUrl: urls.api,
 
   healthCheck: () => BaseApi.get('healthcheck'),
-  login: (model) => BaseApi.post('auth/login', model),
-  refreshToken: () => BaseApi.post('auth/refresh'),
+  login: async (model) => {
+    const token = await BaseApi.post('auth/login', model);
+    applyAuthToken(token);
+    return token;
+  },
+  register: (model) => BaseApi.post('auth/register', model),
+  refreshToken: async () => {
+    const token = await BaseApi.post('auth/refresh');
+    applyAuthToken(token);
+    return token;
+  },
+  clearAuth: () => applyAuthToken(null),
 };

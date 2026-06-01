@@ -1,0 +1,42 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 1.5rem;
+  background-color: var(--color-bg);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(17, 24, 39, 0.06);
+}
+
+.banner {
+  height: 0.375rem;
+  background: var(--color-gradient);
+}
+
+.content {
+  padding: 2rem 2rem 2.25rem;
+}
+
+.brand {
+  margin-bottom: 1.75rem;
+  text-align: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--color-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
