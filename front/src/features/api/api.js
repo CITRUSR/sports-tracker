@@ -126,4 +126,25 @@ export default {
     return token;
   },
   clearAuth: () => applyAuthToken(null),
+
+  getStatistics: () => BaseApi.get('statistics'),
+  getExercises: () => BaseApi.get('exercises'),
+  getWorkouts: ({ from, to, onlyWorkoutsWithExerciseId }) => {
+    const params = new URLSearchParams({ from, to });
+
+    if (onlyWorkoutsWithExerciseId) {
+      params.set('onlyWorkoutsWithExerciseId', onlyWorkoutsWithExerciseId);
+    }
+
+    return BaseApi.get(`workouts?${params.toString()}`);
+  },
+  beginWorkout: () => BaseApi.post('workouts', {}),
+  finishWorkout: (comment) =>
+    BaseApi.post('workouts/finish', comment ?? '', {
+      headers: { 'Content-Type': 'application/json' },
+      transformRequest: [(data) => JSON.stringify(data)],
+    }),
+  addExerciseEntry: (workoutId, entry) =>
+    BaseApi.post(`workouts/${workoutId}/exercise-entries`, entry),
+  createExercise: (name, type = 20) => BaseApi.post('exercises', { name, type }),
 };

@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
+import { useWorkoutEntry } from '../useWorkoutEntry';
 import styles from './WorkoutEntryPage.module.css';
+
+const createExerciseRow = () => ({
+  id: Date.now(),
+  exerciseId: '',
+  sets: 3,
+  reps: 10,
+  weight: 0,
+});
 
 function WorkoutEntryPage() {
   const navigate = useNavigate();
@@ -10,15 +19,19 @@ function WorkoutEntryPage() {
   const [date, setDate] = useState(today);
   const [duration, setDuration] = useState(60);
   const [notes, setNotes] = useState('');
-  const [exercises, setExercises] = useState([
-    { id: 1, name: '', sets: 3, reps: 10, weight: 0 },
-  ]);
+  const [exercises, setExercises] = useState([createExerciseRow()]);
+  const {
+    exerciseOptions,
+    isLoadingExercises,
+    isStarting,
+    isSaving,
+    error,
+    beginWorkout,
+    saveWorkout,
+  } = useWorkoutEntry();
 
   const addExercise = () => {
-    setExercises([
-      ...exercises,
-      { id: Date.now(), name: '', sets: 3, reps: 10, weight: 0 },
-    ]);
+    setExercises([...exercises, createExerciseRow()]);
   };
 
   const removeExercise = (id) => {
@@ -35,17 +48,6 @@ function WorkoutEntryPage() {
     );
   };
 
-  const handleSave = () => {
-    const validExercises = exercises.filter((exercise) => exercise.name.trim());
-    if (!validExercises.length) {
-      alert('Добавьте хотя бы одно упражнение с названием');
-      return;
-    }
-    navigate(ROUTES.WORKOUTS, {
-      state: { toast: '✅ Тренировка сохранена!' },
-    });
-  };
-
   return (
     <>
       <button type="button" className={styles.backBtn} onClick={() => navigate(ROUTES.WORKOUTS)}>
@@ -56,6 +58,8 @@ function WorkoutEntryPage() {
         Выберите, как хотите добавить тренировку
       </div>
 
+      {error && <div className={pageStyles.pageError}>{error}</div>}
+
       <div className={styles.infoCard}>
         <div className={styles.infoItem}>
           <div className={styles.infoIcon}>🏋️</div>
@@ -65,8 +69,13 @@ function WorkoutEntryPage() {
               Ничего заранее указывать не нужно — начните тренировку, а упражнения, подходы
               и время будете фиксировать прямо в процессе.
             </div>
-            <button type="button" className={styles.btnStartNow}>
-              Начать тренировку сейчас
+            <button
+              type="button"
+              className={styles.btnStartNow}
+              onClick={beginWorkout}
+              disabled={isStarting}
+            >
+              {isStarting ? 'Запуск...' : 'Начать тренировку сейчас'}
             </button>
           </div>
         </div>
@@ -123,74 +132,87 @@ function WorkoutEntryPage() {
             type="button"
             className={`${styles.btnPrimary} ${styles.btnPrimarySmall}`}
             onClick={addExercise}
+            disabled={isLoadingExercises}
           >
             + Добавить упражнение
           </button>
         </div>
 
-        {exercises.map((exercise, index) => (
-          <div className={styles.exerciseCard} key={exercise.id}>
-            <div className={styles.exerciseHeader}>
-              <div className={styles.exerciseLabel}>Упражнение {index + 1}</div>
-              {exercises.length > 1 && (
-                <button
-                  type="button"
-                  className={styles.btnDanger}
-                  onClick={() => removeExercise(exercise.id)}
-                >
-                  ✕
-                </button>
-              )}
+        {isLoadingExercises ? (
+          <div className={pageStyles.pageStatus}>Загрузка упражнений...</div>
+        ) : (
+          exercises.map((exercise, index) => (
+            <div className={styles.exerciseCard} key={exercise.id}>
+              <div className={styles.exerciseHeader}>
+                <div className={styles.exerciseLabel}>Упражнение {index + 1}</div>
+                {exercises.length > 1 && (
+                  <button
+                    type="button"
+                    className={styles.btnDanger}
+                    onClick={() => removeExercise(exercise.id)}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <div className={styles.exerciseGrid}>
+                <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
+                  <label className={styles.formLabel}>Упражнение</label>
+                  <select
+                    className={styles.formInput}
+                    value={exercise.exerciseId}
+                    onChange={(event) =>
+                      updateExercise(exercise.id, 'exerciseId', event.target.value)
+                    }
+                  >
+                    <option value="">Выберите упражнение</option>
+                    {exerciseOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
+                  <label className={styles.formLabel}>Подходы</label>
+                  <input
+                    type="number"
+                    className={styles.formInput}
+                    value={exercise.sets}
+                    onChange={(event) =>
+                      updateExercise(exercise.id, 'sets', Number(event.target.value))
+                    }
+                    min={1}
+                  />
+                </div>
+                <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
+                  <label className={styles.formLabel}>Повторения</label>
+                  <input
+                    type="number"
+                    className={styles.formInput}
+                    value={exercise.reps}
+                    onChange={(event) =>
+                      updateExercise(exercise.id, 'reps', Number(event.target.value))
+                    }
+                    min={1}
+                  />
+                </div>
+                <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
+                  <label className={styles.formLabel}>Вес (кг)</label>
+                  <input
+                    type="number"
+                    className={styles.formInput}
+                    value={exercise.weight}
+                    onChange={(event) =>
+                      updateExercise(exercise.id, 'weight', Number(event.target.value))
+                    }
+                    min={1}
+                  />
+                </div>
+              </div>
             </div>
-            <div className={styles.exerciseGrid}>
-              <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
-                <label className={styles.formLabel}>Название</label>
-                <input
-                  className={styles.formInput}
-                  placeholder="Например, Жим штанги"
-                  value={exercise.name}
-                  onChange={(event) => updateExercise(exercise.id, 'name', event.target.value)}
-                />
-              </div>
-              <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
-                <label className={styles.formLabel}>Подходы</label>
-                <input
-                  type="number"
-                  className={styles.formInput}
-                  value={exercise.sets}
-                  onChange={(event) =>
-                    updateExercise(exercise.id, 'sets', Number(event.target.value))
-                  }
-                  min={1}
-                />
-              </div>
-              <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
-                <label className={styles.formLabel}>Повторения</label>
-                <input
-                  type="number"
-                  className={styles.formInput}
-                  value={exercise.reps}
-                  onChange={(event) =>
-                    updateExercise(exercise.id, 'reps', Number(event.target.value))
-                  }
-                  min={1}
-                />
-              </div>
-              <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
-                <label className={styles.formLabel}>Вес (кг)</label>
-                <input
-                  type="number"
-                  className={styles.formInput}
-                  value={exercise.weight}
-                  onChange={(event) =>
-                    updateExercise(exercise.id, 'weight', Number(event.target.value))
-                  }
-                  min={0}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       <div className={styles.formCard}>
@@ -207,14 +229,16 @@ function WorkoutEntryPage() {
         <button
           type="button"
           className={`${styles.btnPrimary} ${styles.btnPrimaryLarge}`}
-          onClick={handleSave}
+          onClick={() => saveWorkout(exercises, notes)}
+          disabled={isSaving || isLoadingExercises}
         >
-          💾 Сохранить тренировку
+          {isSaving ? 'Сохранение...' : '💾 Сохранить тренировку'}
         </button>
         <button
           type="button"
           className={`${styles.btnOutline} ${styles.btnOutlineLarge}`}
           onClick={() => navigate(ROUTES.WORKOUTS)}
+          disabled={isSaving}
         >
           Отмена
         </button>
