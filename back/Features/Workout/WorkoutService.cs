@@ -74,6 +74,7 @@ public class WorkoutService : IWorkoutService
 
         var workouts = await query.Select(x => new WorkoutDto
         {
+            Id = x.Id,
             Comment = x.Comment,
             Date = x.Date,
             TimeEnd = x.TimeEnd,
