@@ -1,0 +1,225 @@
+.main {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.pageSub {
+  font-size: 14px;
+  color: #8b91a8;
+  margin-bottom: 28px;
+}
+
+.pageSubCompact {
+  margin-bottom: 24px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8b91a8;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #1a1d2e;
+}
+
+.formCard {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.formSectionTitle {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.formSectionTitleInline {
+  margin-bottom: 0;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroupInline {
+  margin-bottom: 0;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b91a8;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.formInput {
+  width: 100%;
+  background: #f0f2f8;
+  border: 1.5px solid #e4e7f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  color: #1a1d2e;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus {
+  border-color: #3b5bf5;
+  background: white;
+}
+
+.formTextarea {
+  resize: none;
+  height: 100px;
+}
+
+.exerciseCard {
+  border: 1.5px solid #e4e7f0;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 12px;
+}
+
+.exerciseLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b91a8;
+  margin-bottom: 14px;
+}
+
+.exerciseGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 10px;
+  align-items: end;
+}
+
+.exerciseHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.formCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btnPrimary {
+  background: #3b5bf5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(59, 91, 245, 0.3);
+}
+
+.btnPrimary:hover {
+  background: #2a4ae0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 91, 245, 0.4);
+}
+
+.btnPrimaryLarge {
+  flex: 1;
+  justify-content: center;
+  padding: 14px;
+}
+
+.btnPrimarySmall {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btnOutline {
+  background: transparent;
+  color: #3b5bf5;
+  border: 2px solid #3b5bf5;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnOutline:hover {
+  background: #eef1ff;
+}
+
+.btnOutlineLarge {
+  padding: 14px 24px;
+}
+
+.btnDanger {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  transition: opacity 0.2s;
+}
+
+.btnDanger:hover {
+  opacity: 0.7;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .exerciseGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    padding: 16px;
+  }
+}

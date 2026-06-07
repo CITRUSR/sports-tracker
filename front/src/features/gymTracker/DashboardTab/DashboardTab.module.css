@@ -1,0 +1,185 @@
+.main {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.pageSub {
+  font-size: 14px;
+  color: #8b91a8;
+  margin-bottom: 28px;
+}
+
+.btnPrimary {
+  background: #3b5bf5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(59, 91, 245, 0.3);
+}
+
+.btnPrimary:hover {
+  background: #2a4ae0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(59, 91, 245, 0.4);
+}
+
+.btnPrimaryFull {
+  width: 100%;
+  justify-content: center;
+}
+
+.btnOutline {
+  background: transparent;
+  color: #3b5bf5;
+  border: 2px solid #3b5bf5;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnOutline:hover {
+  background: #eef1ff;
+}
+
+.btnOutlineFull {
+  width: 100%;
+  justify-content: center;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.favBanner {
+  background: linear-gradient(135deg, #3b5bf5 0%, #9b59f5 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.favIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.favLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.favVal {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.actionCard {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.actionIcon {
+  font-size: 28px;
+  margin-bottom: 14px;
+}
+
+.actionIconPurple {
+  color: #9b59f5;
+}
+
+.actionTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.actionDesc {
+  font-size: 13px;
+  color: #8b91a8;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.emptyCard {
+  background: white;
+  border-radius: 16px;
+  padding: 60px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.emptyIcon {
+  font-size: 48px;
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.emptyDesc {
+  font-size: 13px;
+  color: #8b91a8;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .main {
+    padding: 16px;
+  }
+}

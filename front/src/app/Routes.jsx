@@ -1,4 +1,4 @@
-import GymTracker from '../features/home/GymTracker';
+import GymTracker from '../features/gymTracker/GymTracker';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
 import NotFoundPage from '../features/notFound/NotFoundPage';
