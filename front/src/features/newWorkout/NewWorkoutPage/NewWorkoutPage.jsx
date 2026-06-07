@@ -53,11 +53,38 @@ function NewWorkoutPage() {
       </button>
       <div className={pageStyles.pageTitle}>Новая тренировка</div>
       <div className={`${pageStyles.pageSub} ${pageStyles.pageSubCompact}`}>
-        Добавьте результаты тренировки
+        Выберите, как хотите добавить тренировку
+      </div>
+
+      <div className={styles.infoCard}>
+        <div className={styles.infoItem}>
+          <div className={styles.infoIcon}>🏋️</div>
+          <div>
+            <div className={styles.infoTitle}>Новая тренировка</div>
+            <div className={styles.infoText}>
+              Ничего заранее указывать не нужно — начните тренировку, а упражнения, подходы
+              и время будете фиксировать прямо в процессе.
+            </div>
+            <button type="button" className={styles.btnStartNow}>
+              Начать тренировку сейчас
+            </button>
+          </div>
+        </div>
+        <div className={styles.infoDivider} />
+        <div className={styles.infoItem}>
+          <div className={styles.infoIcon}>📋</div>
+          <div>
+            <div className={styles.infoTitle}>Прошлая тренировка</div>
+            <div className={styles.infoText}>
+              Перенесите старые записи: сразу укажите дату, длительность, упражнения и
+              результаты в форме ниже.
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className={styles.formCard}>
-        <div className={styles.formSectionTitle}>Основная информация</div>
+        <div className={styles.formSectionTitle}>Перенос прошлой тренировки</div>
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
             <label className={styles.formLabel} htmlFor="workout-date">
