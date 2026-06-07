@@ -31,9 +31,6 @@ function GymLayout() {
               <div className={styles.logoSub}>Учет результатов</div>
             </div>
           </Link>
-          <Link to={ROUTES.NEW_WORKOUT} className={styles.btnPrimary}>
-            + Добавить тренировку
-          </Link>
         </div>
       </header>
 
