@@ -1,4 +1,4 @@
-import Home from '../features/home/HomePage';
+import GymTracker from '../features/home/GymTracker';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
 import NotFoundPage from '../features/notFound/NotFoundPage';
@@ -13,7 +13,7 @@ export const routes = [
     access: ROUTE_ACCESS.PRIVATE,
     element: (
       <DefaultLayout>
-        <Home />
+        <GymTracker  />
       </DefaultLayout>
     ),
   },
