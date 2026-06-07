@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
-import styles from './NewWorkoutPage.module.css';
+import styles from './WorkoutEntryPage.module.css';
 
-function NewWorkoutPage() {
+function WorkoutEntryPage() {
   const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState(today);
@@ -223,4 +223,4 @@ function NewWorkoutPage() {
   );
 }
 
-export default NewWorkoutPage;
+export default WorkoutEntryPage;

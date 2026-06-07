@@ -1,5 +1,5 @@
 import GymTracker from '../features/gymTracker/GymTracker/GymTracker';
-import NewWorkoutPage from '../features/newWorkout/NewWorkoutPage/NewWorkoutPage';
+import WorkoutEntryPage from '../features/workouts/WorkoutEntryPage/WorkoutEntryPage';
 import ProgressPage from '../features/progress/ProgressPage/ProgressPage';
 import WorkoutsPage from '../features/workouts/WorkoutsPage/WorkoutsPage';
 import LoginPage from '../features/auth/LoginPage';
@@ -27,7 +27,7 @@ export const routes = [
       {
         path: ROUTES.NEW_WORKOUT,
         access: ROUTE_ACCESS.PRIVATE,
-        element: <NewWorkoutPage />,
+        element: <WorkoutEntryPage />,
       },
       {
         path: ROUTES.WORKOUTS,
