@@ -42,16 +42,7 @@ function NewWorkoutPage() {
       return;
     }
     navigate(ROUTES.WORKOUTS, {
-      state: {
-        toast: '✅ Тренировка сохранена!',
-        savedWorkout: {
-          id: Date.now(),
-          date,
-          duration: Number(duration),
-          notes,
-          exercises: validExercises,
-        },
-      },
+      state: { toast: '✅ Тренировка сохранена!' },
     });
   };
 
