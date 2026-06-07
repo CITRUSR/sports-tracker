@@ -1,21 +1,3 @@
-.main {
-  padding: 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.pageTitle {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.pageSub {
-  font-size: 14px;
-  color: #8b91a8;
-  margin-bottom: 28px;
-}
-
 .btnPrimary {
   background: #3b5bf5;
   color: white;
@@ -26,11 +8,12 @@
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(59, 91, 245, 0.3);
+  text-decoration: none;
 }
 
 .btnPrimary:hover {
@@ -47,6 +30,7 @@
   font-family: 'Manrope', sans-serif;
   font-size: 14px;
   flex: 1;
+  min-width: 0;
   outline: none;
   color: #1a1d2e;
   transition: border-color 0.2s;
@@ -84,12 +68,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   transition: box-shadow 0.2s;
   cursor: pointer;
 }
 
 .workoutCard:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.workoutInfo {
+  min-width: 0;
+  flex: 1;
 }
 
 .workoutDate {
@@ -108,6 +98,7 @@
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 4px;
+  word-break: break-word;
 }
 
 .workoutBadge {
@@ -117,16 +108,17 @@
   font-weight: 700;
   padding: 6px 14px;
   border-radius: 8px;
+  white-space: nowrap;
 }
 
 .workoutMeta {
-  text-align: right;
+  flex-shrink: 0;
 }
 
 .emptyCard {
   background: white;
   border-radius: 16px;
-  padding: 60px;
+  padding: 60px 32px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -150,7 +142,22 @@
 }
 
 @media (max-width: 768px) {
-  .main {
-    padding: 16px;
+  .searchRow {
+    flex-direction: column;
+  }
+
+  .filterSelect {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .workoutCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 20px;
+  }
+
+  .emptyCard {
+    padding: 40px 24px;
   }
 }

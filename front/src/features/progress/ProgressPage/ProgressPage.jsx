@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import styles from './ProgressPage.module.css';
 
 function ProgressPage({ exerciseNames = [], chartDataByExercise = {} }) {
@@ -14,9 +15,9 @@ function ProgressPage({ exerciseNames = [], chartDataByExercise = {} }) {
   const maxVolume = chartData.length ? Math.max(...chartData.map((item) => item.volume)) : 1;
 
   return (
-    <div className={styles.main}>
-      <div className={styles.pageTitle}>Прогресс 📈</div>
-      <div className={styles.pageSub}>Отслеживайте прогресс по каждому упражнению</div>
+    <>
+      <div className={pageStyles.pageTitle}>Прогресс 📈</div>
+      <div className={pageStyles.pageSub}>Отслеживайте прогресс по каждому упражнению</div>
 
       {exerciseNames.length === 0 ? (
         <div className={styles.emptyCard}>
@@ -45,17 +46,19 @@ function ProgressPage({ exerciseNames = [], chartDataByExercise = {} }) {
           {chartData.length > 0 ? (
             <>
               <div className={styles.chartLabel}>Объём (кг × повторения × подходы)</div>
-              <div className={styles.chartWrap}>
-                {chartData.map((item, index) => (
-                  <div className={styles.chartBarGroup} key={index}>
-                    <div className={styles.chartBarVal}>{item.volume}</div>
-                    <div
-                      className={styles.chartBar}
-                      style={{ height: `${(item.volume / maxVolume) * 160}px` }}
-                    />
-                    <div className={styles.chartBarLabel}>{item.date}</div>
-                  </div>
-                ))}
+              <div className={styles.chartScroll}>
+                <div className={styles.chartWrap}>
+                  {chartData.map((item, index) => (
+                    <div className={styles.chartBarGroup} key={index}>
+                      <div className={styles.chartBarVal}>{item.volume}</div>
+                      <div
+                        className={styles.chartBar}
+                        style={{ height: `${(item.volume / maxVolume) * 160}px` }}
+                      />
+                      <div className={styles.chartBarLabel}>{item.date}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           ) : (
@@ -63,7 +66,7 @@ function ProgressPage({ exerciseNames = [], chartDataByExercise = {} }) {
           )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 

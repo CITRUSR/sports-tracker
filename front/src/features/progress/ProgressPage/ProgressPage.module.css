@@ -1,25 +1,7 @@
-.main {
-  padding: 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.pageTitle {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.pageSub {
-  font-size: 14px;
-  color: #8b91a8;
-  margin-bottom: 28px;
-}
-
 .emptyCard {
   background: white;
   border-radius: 16px;
-  padding: 60px;
+  padding: 60px 32px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
@@ -94,6 +76,13 @@
   margin-bottom: 8px;
 }
 
+.chartScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
 .chartWrap {
   position: relative;
   height: 220px;
@@ -101,6 +90,7 @@
   align-items: flex-end;
   gap: 8px;
   padding: 16px 0 0;
+  min-width: 280px;
 }
 
 .chartBarGroup {
@@ -108,6 +98,7 @@
   flex-direction: column;
   align-items: center;
   flex: 1;
+  min-width: 32px;
   gap: 4px;
 }
 
@@ -139,7 +130,11 @@
 }
 
 @media (max-width: 768px) {
-  .main {
-    padding: 16px;
+  .progressCard {
+    padding: 20px;
+  }
+
+  .emptyCard {
+    padding: 40px 24px;
   }
 }

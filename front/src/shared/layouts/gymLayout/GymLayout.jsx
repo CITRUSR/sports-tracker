@@ -23,36 +23,42 @@ function GymLayout() {
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        <Link to={ROUTES.HOME} className={styles.logo}>
-          <div className={styles.logoIcon}>🏋️</div>
-          <div>
-            <div className={styles.logoText}>GymTracker</div>
-            <div className={styles.logoSub}>Учет результатов</div>
-          </div>
-        </Link>
-        <Link to={ROUTES.NEW_WORKOUT} className={styles.btnPrimary}>
-          + Добавить тренировку
-        </Link>
+        <div className={`${styles.shell} ${styles.headerInner}`}>
+          <Link to={ROUTES.HOME} className={styles.logo}>
+            <div className={styles.logoIcon}>🏋️</div>
+            <div>
+              <div className={styles.logoText}>GymTracker</div>
+              <div className={styles.logoSub}>Учет результатов</div>
+            </div>
+          </Link>
+          <Link to={ROUTES.NEW_WORKOUT} className={styles.btnPrimary}>
+            + Добавить тренировку
+          </Link>
+        </div>
       </header>
 
       {!isNewWorkout && (
         <nav className={styles.nav}>
-          {NAV_TABS.map((tab) => (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              end={tab.path === ROUTES.HOME}
-              className={({ isActive }) =>
-                `${styles.navTab} ${isActive ? styles.navTabActive : ''}`
-              }
-            >
-              {tab.icon} {tab.label}
-            </NavLink>
-          ))}
+          <div className={`${styles.shell} ${styles.navInner}`}>
+            {NAV_TABS.map((tab) => (
+              <NavLink
+                key={tab.path}
+                to={tab.path}
+                end={tab.path === ROUTES.HOME}
+                className={({ isActive }) =>
+                  `${styles.navTab} ${isActive ? styles.navTabActive : ''}`
+                }
+              >
+                {tab.icon} {tab.label}
+              </NavLink>
+            ))}
+          </div>
         </nav>
       )}
 
-      <Outlet />
+      <main className={`${styles.shell} ${styles.content}`}>
+        <Outlet />
+      </main>
 
       {toast && <div className={styles.toast}>{toast}</div>}
     </div>

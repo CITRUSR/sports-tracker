@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import StatCard from '../StatCard/StatCard';
 import { EMPTY_STATISTICS } from '../constants';
 import styles from './GymTracker.module.css';
@@ -16,9 +17,9 @@ function GymTracker() {
   } = statistics;
 
   return (
-    <div className={styles.main}>
-      <div className={styles.pageTitle}>Добро пожаловать! 👋</div>
-      <div className={styles.pageSub}>Отслеживайте свой прогресс и достигайте новых высот</div>
+    <>
+      <div className={pageStyles.pageTitle}>Добро пожаловать! 👋</div>
+      <div className={pageStyles.pageSub}>Отслеживайте свой прогресс и достигайте новых высот</div>
 
       <div className={styles.statsGrid}>
         <StatCard label="Всего тренировок" value={workoutsCount} icon="📅" iconBg="#EEF1FF" />
@@ -75,7 +76,7 @@ function GymTracker() {
           </Link>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { SAMPLE_WORKOUTS } from '../constants';
 import styles from './WorkoutsPage.module.css';
 
@@ -34,9 +35,9 @@ function WorkoutsPage() {
     );
 
   return (
-    <div className={styles.main}>
-      <div className={styles.pageTitle}>Мои тренировки</div>
-      <div className={styles.pageSub}>История всех тренировок ({workouts.length})</div>
+    <>
+      <div className={pageStyles.pageTitle}>Мои тренировки</div>
+      <div className={pageStyles.pageSub}>История всех тренировок ({workouts.length})</div>
 
       <div className={styles.searchRow}>
         <input
@@ -72,7 +73,7 @@ function WorkoutsPage() {
 
           return (
             <div className={styles.workoutCard} key={workout.id}>
-              <div>
+              <div className={styles.workoutInfo}>
                 <div className={styles.workoutDate}>
                   {new Date(workout.date).toLocaleDateString('ru-RU', {
                     day: '2-digit',
@@ -93,7 +94,7 @@ function WorkoutsPage() {
           );
         })
       )}
-    </div>
+    </>
   );
 }
 

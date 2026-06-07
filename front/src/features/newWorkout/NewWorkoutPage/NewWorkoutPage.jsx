@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import styles from './NewWorkoutPage.module.css';
 
 function NewWorkoutPage() {
@@ -55,12 +56,12 @@ function NewWorkoutPage() {
   };
 
   return (
-    <div className={styles.main}>
+    <>
       <button type="button" className={styles.backBtn} onClick={() => navigate(ROUTES.WORKOUTS)}>
         ← Назад
       </button>
-      <div className={styles.pageTitle}>Новая тренировка</div>
-      <div className={`${styles.pageSub} ${styles.pageSubCompact}`}>
+      <div className={pageStyles.pageTitle}>Новая тренировка</div>
+      <div className={`${pageStyles.pageSub} ${pageStyles.pageSubCompact}`}>
         Добавьте результаты тренировки
       </div>
 
@@ -200,7 +201,7 @@ function NewWorkoutPage() {
           Отмена
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
