@@ -6,6 +6,7 @@ using back.Domain;
 using back.Features.Auth;
 using back.Features.Exercise;
 using back.Features.Profile;
+using back.Features.Statistic;
 using back.Features.WeightHistory;
 using back.Features.Workout;
 using back.Infrastructure;
@@ -169,6 +170,8 @@ public static class ProgramExtensions
         builder.Services.AddSingleton<IWorkoutExerciseService, WorkoutExerciseService>();
 
         builder.Services.AddScoped<IWeightHistoryService, WeightHistoryService>();
+
+        builder.Services.AddScoped<IStatisticsService, StatisticsService>();
     }
 
     private static void AddJwt(WebApplicationBuilder builder)
