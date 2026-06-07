@@ -24,6 +24,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .logoIcon {
@@ -63,9 +65,7 @@
   font-size: 14px;
   font-weight: 600;
   color: #8b91a8;
-  cursor: pointer;
-  border: none;
-  background: none;
+  text-decoration: none;
   font-family: 'Manrope', sans-serif;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
@@ -75,7 +75,7 @@
   transition: all 0.2s;
 }
 
-.navTab:hover:not(.navTabActive) {
+.navTab:hover {
   color: #1a1d2e;
 }
 
@@ -99,6 +99,7 @@
   gap: 6px;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(59, 91, 245, 0.3);
+  text-decoration: none;
 }
 
 .btnPrimary:hover {

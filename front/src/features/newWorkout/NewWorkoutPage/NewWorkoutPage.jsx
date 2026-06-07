@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
 import styles from './NewWorkoutPage.module.css';
 
-function NewWorkoutPage({ onSave, onCancel }) {
+function NewWorkoutPage() {
+  const navigate = useNavigate();
   const today = new Date().toISOString().split('T')[0];
   const [date, setDate] = useState(today);
   const [duration, setDuration] = useState(60);
@@ -37,18 +40,23 @@ function NewWorkoutPage({ onSave, onCancel }) {
       alert('Добавьте хотя бы одно упражнение с названием');
       return;
     }
-    onSave({
-      id: Date.now(),
-      date,
-      duration: Number(duration),
-      notes,
-      exercises: validExercises,
+    navigate(ROUTES.WORKOUTS, {
+      state: {
+        toast: '✅ Тренировка сохранена!',
+        savedWorkout: {
+          id: Date.now(),
+          date,
+          duration: Number(duration),
+          notes,
+          exercises: validExercises,
+        },
+      },
     });
   };
 
   return (
     <div className={styles.main}>
-      <button type="button" className={styles.backBtn} onClick={onCancel}>
+      <button type="button" className={styles.backBtn} onClick={() => navigate(ROUTES.WORKOUTS)}>
         ← Назад
       </button>
       <div className={styles.pageTitle}>Новая тренировка</div>
@@ -187,7 +195,7 @@ function NewWorkoutPage({ onSave, onCancel }) {
         <button
           type="button"
           className={`${styles.btnOutline} ${styles.btnOutlineLarge}`}
-          onClick={onCancel}
+          onClick={() => navigate(ROUTES.WORKOUTS)}
         >
           Отмена
         </button>

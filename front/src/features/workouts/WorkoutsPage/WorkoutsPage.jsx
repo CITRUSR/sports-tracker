@@ -1,9 +1,25 @@
-import { useState } from 'react';
-import styles from './WorkoutsTab.module.css';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
+import { SAMPLE_WORKOUTS } from '../constants';
+import styles from './WorkoutsPage.module.css';
 
-function WorkoutsTab({ workouts, onAdd }) {
+function WorkoutsPage() {
+  const location = useLocation();
+  const [workouts, setWorkouts] = useState(SAMPLE_WORKOUTS);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('date');
+
+  useEffect(() => {
+    const savedWorkout = location.state?.savedWorkout;
+    if (!savedWorkout) return;
+
+    setWorkouts((prev) =>
+      prev.some((workout) => workout.id === savedWorkout.id)
+        ? prev
+        : [savedWorkout, ...prev],
+    );
+  }, [location.state?.savedWorkout]);
 
   const filtered = workouts
     .filter(
@@ -44,9 +60,9 @@ function WorkoutsTab({ workouts, onAdd }) {
           <div className={styles.emptyIcon}>📋</div>
           <div className={styles.emptyTitle}>У вас пока нет тренировок</div>
           <div className={styles.emptyDesc}>Добавьте первую тренировку</div>
-          <button type="button" className={styles.btnPrimary} onClick={onAdd}>
+          <Link to={ROUTES.NEW_WORKOUT} className={styles.btnPrimary}>
             + Добавить тренировку
-          </button>
+          </Link>
         </div>
       ) : (
         filtered.map((workout) => {
@@ -81,4 +97,4 @@ function WorkoutsTab({ workouts, onAdd }) {
   );
 }
 
-export default WorkoutsTab;
+export default WorkoutsPage;

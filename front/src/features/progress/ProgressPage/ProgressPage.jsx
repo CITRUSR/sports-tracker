@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import styles from './ProgressTab.module.css';
+import styles from './ProgressPage.module.css';
 
-function ProgressTab({ exerciseNames = [], chartDataByExercise = {} }) {
+function ProgressPage({ exerciseNames = [], chartDataByExercise = {} }) {
   const [selected, setSelected] = useState(exerciseNames[0] || null);
 
   useEffect(() => {
@@ -67,4 +67,4 @@ function ProgressTab({ exerciseNames = [], chartDataByExercise = {} }) {
   );
 }
 
-export default ProgressTab;
+export default ProgressPage;

@@ -1,7 +1,12 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../../../constants/routes';
 import StatCard from '../StatCard/StatCard';
-import styles from './DashboardTab.module.css';
+import { EMPTY_STATISTICS } from '../constants';
+import styles from './GymTracker.module.css';
 
-function DashboardTab({ statistics, onStart, onProgress }) {
+function GymTracker() {
+  const [statistics] = useState(EMPTY_STATISTICS);
   const {
     workoutsCount,
     exercisesCount,
@@ -42,13 +47,9 @@ function DashboardTab({ statistics, onStart, onProgress }) {
           <div className={styles.actionDesc}>
             Начните записывать новую тренировку и отслеживайте прогресс
           </div>
-          <button
-            type="button"
-            className={`${styles.btnPrimary} ${styles.btnPrimaryFull}`}
-            onClick={onStart}
-          >
+          <Link to={ROUTES.NEW_WORKOUT} className={`${styles.btnPrimary} ${styles.btnPrimaryFull}`}>
             Начать тренировку
-          </button>
+          </Link>
         </div>
         <div className={styles.actionCard}>
           <div className={`${styles.actionIcon} ${styles.actionIconPurple}`}>📊</div>
@@ -56,13 +57,9 @@ function DashboardTab({ statistics, onStart, onProgress }) {
           <div className={styles.actionDesc}>
             Просматривайте детальную статистику по каждому упражнению
           </div>
-          <button
-            type="button"
-            className={`${styles.btnOutline} ${styles.btnOutlineFull}`}
-            onClick={onProgress}
-          >
+          <Link to={ROUTES.PROGRESS} className={`${styles.btnOutline} ${styles.btnOutlineFull}`}>
             Посмотреть прогресс
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -73,13 +70,13 @@ function DashboardTab({ statistics, onStart, onProgress }) {
           <div className={styles.emptyDesc}>
             Добавьте первую тренировку, чтобы начать отслеживать прогресс
           </div>
-          <button type="button" className={styles.btnPrimary} onClick={onStart}>
+          <Link to={ROUTES.NEW_WORKOUT} className={styles.btnPrimary}>
             Добавить первую тренировку
-          </button>
+          </Link>
         </div>
       )}
     </div>
   );
 }
 
-export default DashboardTab;
+export default GymTracker;
