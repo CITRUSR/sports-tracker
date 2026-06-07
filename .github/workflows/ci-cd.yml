@@ -32,4 +32,4 @@ jobs:
           script: |
             cd ~/sports-tracker
             git pull
-            docker compose up frontend-prod backend db grafana -d --build
+            docker compose up frontend-prod backend grafana -d --build
