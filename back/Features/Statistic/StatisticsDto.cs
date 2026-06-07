@@ -6,4 +6,5 @@ public class StatisticsDto
     public int ExercisesCount { get; set; }
     public decimal TotalVolume { get; set; }
     public TimeSpan AverageDuration { get; set; }
+    public string? FavoriteExercise { get; set; }
 }

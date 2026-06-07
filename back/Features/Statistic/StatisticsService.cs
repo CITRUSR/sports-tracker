@@ -33,12 +33,22 @@ public class StatisticsService : IStatisticsService
             .ToListAsync(cancellationToken);
         var averageDuration = completed.Count > 0 ? completed.Average() : 0;
 
+        var favoriteExercise = await _dbContext.ExerciseEntries
+            .Where(x => x.Workout.UserId == userId)
+            .GroupBy(x => x.Exercise.Name)
+            .Select(g => new { Name = g.Key, Count = g.Count() })
+            .OrderByDescending(x => x.Count)
+            .ThenBy(x => x.Name)
+            .Select(x => x.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+
         return new StatisticsDto
         {
             WorkoutsCount = workoutsCount,
             ExercisesCount = exercisesCount,
             TotalVolume = totalVolume ?? 0,
             AverageDuration = TimeSpan.FromSeconds(averageDuration),
+            FavoriteExercise = favoriteExercise,
         };
     }
 }

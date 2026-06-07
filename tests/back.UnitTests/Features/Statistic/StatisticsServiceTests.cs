@@ -68,6 +68,7 @@ public class StatisticsServiceTests
         Assert.Equal(0, result.ExercisesCount);
         Assert.Equal(0, result.TotalVolume);
         Assert.Equal(TimeSpan.Zero, result.AverageDuration);
+        Assert.Null(result.FavoriteExercise);
     }
 
     [Fact]
@@ -175,5 +176,82 @@ public class StatisticsServiceTests
 
         Assert.Equal(1, result.WorkoutsCount);
         Assert.Equal(TimeSpan.Zero, result.AverageDuration);
+    }
+
+    [Fact]
+    public async Task GetStatisticsAsync_ReturnsMostFrequentExercise_AsFavorite()
+    {
+        await using var db = CreateDbContext();
+
+        var bench = CreateExercise(1, "Bench press");
+        var squat = CreateExercise(2, "Squat");
+        var workout = CreateWorkout("user1", new TimeOnly(10, 0), new TimeOnly(11, 0));
+
+        db.Exercises.AddRange(bench, squat);
+        db.Workouts.Add(workout);
+        db.ExerciseEntries.AddRange(
+            CreateEntry(workout, bench, 80, 10),
+            CreateEntry(workout, bench, 85, 8),
+            CreateEntry(workout, bench, 90, 6),
+            CreateEntry(workout, squat, 100, 5),
+            CreateEntry(workout, squat, 110, 5));
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+
+        var result = await service.GetStatisticsAsync("user1");
+
+        Assert.Equal("Bench press", result.FavoriteExercise);
+    }
+
+    [Fact]
+    public async Task GetStatisticsAsync_ReturnsAlphabeticallyFirstExercise_WhenCountsAreEqual()
+    {
+        await using var db = CreateDbContext();
+
+        var bench = CreateExercise(1, "Bench press");
+        var squat = CreateExercise(2, "Squat");
+        var workout = CreateWorkout("user1", new TimeOnly(10, 0), new TimeOnly(11, 0));
+
+        db.Exercises.AddRange(bench, squat);
+        db.Workouts.Add(workout);
+        db.ExerciseEntries.AddRange(
+            CreateEntry(workout, bench, 80, 10),
+            CreateEntry(workout, bench, 85, 8),
+            CreateEntry(workout, squat, 100, 5),
+            CreateEntry(workout, squat, 110, 5));
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+
+        var result = await service.GetStatisticsAsync("user1");
+
+        Assert.Equal("Bench press", result.FavoriteExercise);
+    }
+
+    [Fact]
+    public async Task GetStatisticsAsync_IgnoresOtherUsersExercises_ForFavorite()
+    {
+        await using var db = CreateDbContext();
+
+        var bench = CreateExercise(1, "Bench press");
+        var squat = CreateExercise(2, "Squat");
+        var userWorkout = CreateWorkout("user1", new TimeOnly(10, 0), new TimeOnly(11, 0));
+        var otherWorkout = CreateWorkout("user2", new TimeOnly(10, 0), new TimeOnly(11, 0));
+
+        db.Exercises.AddRange(bench, squat);
+        db.Workouts.AddRange(userWorkout, otherWorkout);
+        db.ExerciseEntries.AddRange(
+            CreateEntry(userWorkout, squat, 100, 5),
+            CreateEntry(otherWorkout, bench, 80, 10),
+            CreateEntry(otherWorkout, bench, 85, 8),
+            CreateEntry(otherWorkout, bench, 90, 6));
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+
+        var result = await service.GetStatisticsAsync("user1");
+
+        Assert.Equal("Squat", result.FavoriteExercise);
     }
 }
