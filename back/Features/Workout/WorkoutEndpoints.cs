@@ -11,6 +11,26 @@ public class WorkoutEndpoints : IEndpointMarker
 
     public void MapEndpoints(RouteGroupBuilder app)
     {
+        app.MapGet(_baseRoute, async ([FromServices] IWorkoutService workoutService, HttpContext context,
+            [FromQuery] DateTimeOffset from, [FromQuery] DateTimeOffset to,
+            [FromQuery] int? onlyWorkoutsWithExerciseId, CancellationToken cancellationToken) =>
+        {
+            var userId = context.User.GetId();
+
+            var workouts = await workoutService.GetAsync(userId, new WorkoutFilter
+            {
+                From = from,
+                To = to,
+                OnlyWorkoutsWithExerciseId = onlyWorkoutsWithExerciseId,
+            }, cancellationToken);
+
+            return Results.Ok(workouts);
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Get workouts filtered by date range and optional exercise")
+        .Produces(StatusCodes.Status200OK, typeof(List<WorkoutDto>));
+
         app.MapPost(_baseRoute, async ([FromServices] IWorkoutService workoutService, HttpContext context) =>
         {
             var userId = context.User.GetId();

@@ -1,0 +1,152 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../../constants/routes';
+import api from '../api/api';
+
+async function getActiveWorkoutId() {
+  const today = new Date().toISOString().split('T')[0];
+  const workouts = await api.getWorkouts({ from: today, to: today });
+  const activeWorkout = workouts.find((workout) => !workout.timeEnd);
+
+  return activeWorkout?.id ?? null;
+}
+
+async function savePastWorkout({ exercises, notes }) {
+  await api.beginWorkout();
+
+  const workoutId = await getActiveWorkoutId();
+  if (!workoutId) {
+    throw new Error('Active workout not found');
+  }
+
+  for (const exercise of exercises) {
+    for (let setIndex = 0; setIndex < exercise.sets; setIndex += 1) {
+      await api.addExerciseEntry(workoutId, {
+        exerciseId: exercise.exerciseId,
+        weight: exercise.weight,
+        repetitions: exercise.reps,
+      });
+    }
+  }
+
+  await api.finishWorkout(notes);
+}
+
+function getWorkoutErrorMessage(err, { fallback, conflict }) {
+  if (err.response?.status === 409) {
+    return conflict;
+  }
+
+  return fallback;
+}
+
+export function useWorkoutEntry() {
+  const navigate = useNavigate();
+  const [exerciseOptions, setExerciseOptions] = useState([]);
+  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadExercises = async () => {
+      setIsLoadingExercises(true);
+      setError('');
+
+      try {
+        const data = await api.getExercises();
+
+        if (!isCancelled) {
+          setExerciseOptions(data);
+        }
+      } catch {
+        if (!isCancelled) {
+          setError('Не удалось загрузить список упражнений');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingExercises(false);
+        }
+      }
+    };
+
+    loadExercises();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const beginWorkout = async () => {
+    setError('');
+    setIsStarting(true);
+
+    try {
+      await api.beginWorkout();
+      navigate(ROUTES.WORKOUTS, {
+        state: { toast: '🏋️ Тренировка начата!' },
+      });
+    } catch (err) {
+      setError(getWorkoutErrorMessage(err, {
+        fallback: 'Не удалось начать тренировку',
+        conflict: 'У вас уже есть активная тренировка',
+      }));
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
+  const saveWorkout = async (formExercises, notes) => {
+    const validExercises = formExercises.filter((exercise) => exercise.exerciseId);
+
+    if (!validExercises.length) {
+      setError('Выберите хотя бы одно упражнение');
+      return;
+    }
+
+    const invalidWeight = validExercises.some((exercise) => Number(exercise.weight) <= 0);
+
+    if (invalidWeight) {
+      setError('Укажите вес больше 0 для каждого упражнения');
+      return;
+    }
+
+    setError('');
+    setIsSaving(true);
+
+    try {
+      await savePastWorkout({
+        exercises: validExercises.map((exercise) => ({
+          exerciseId: Number(exercise.exerciseId),
+          sets: Number(exercise.sets),
+          reps: Number(exercise.reps),
+          weight: Number(exercise.weight),
+        })),
+        notes,
+      });
+
+      navigate(ROUTES.WORKOUTS, {
+        state: { toast: '✅ Тренировка сохранена!' },
+      });
+    } catch (err) {
+      setError(getWorkoutErrorMessage(err, {
+        fallback: 'Не удалось сохранить тренировку',
+        conflict: 'Завершите активную тренировку перед сохранением новой',
+      }));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return {
+    exerciseOptions,
+    isLoadingExercises,
+    isStarting,
+    isSaving,
+    error,
+    beginWorkout,
+    saveWorkout,
+  };
+}

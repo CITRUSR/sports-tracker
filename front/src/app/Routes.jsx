@@ -1,4 +1,7 @@
-import Home from '../features/home/HomePage';
+import GymTracker from '../features/gymTracker/GymTracker/GymTracker';
+import WorkoutEntryPage from '../features/workouts/WorkoutEntryPage/WorkoutEntryPage';
+import ProgressPage from '../features/progress/ProgressPage/ProgressPage';
+import WorkoutsPage from '../features/workouts/WorkoutsPage/WorkoutsPage';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
 import NotFoundPage from '../features/notFound/NotFoundPage';
@@ -6,16 +9,37 @@ import { ROUTE_ACCESS } from '../constants/routeAccess';
 import { ROUTES } from '../constants/routes';
 import DefaultLayout from '../shared/layouts/defaultLayout/DefaultLayout';
 import AuthLayout from '../shared/layouts/authLayout/AuthLayout';
+import GymLayout from '../shared/layouts/gymLayout/GymLayout';
 
 export const routes = [
   {
-    path: ROUTES.HOME,
-    access: ROUTE_ACCESS.PRIVATE,
     element: (
       <DefaultLayout>
-        <Home />
+        <GymLayout />
       </DefaultLayout>
     ),
+    children: [
+      {
+        index: true,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <GymTracker />,
+      },
+      {
+        path: ROUTES.NEW_WORKOUT,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <WorkoutEntryPage />,
+      },
+      {
+        path: ROUTES.WORKOUTS,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <WorkoutsPage />,
+      },
+      {
+        path: ROUTES.PROGRESS,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <ProgressPage />,
+      },
+    ],
   },
   {
     element: <AuthLayout />,
