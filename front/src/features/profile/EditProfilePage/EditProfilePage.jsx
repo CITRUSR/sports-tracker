@@ -28,7 +28,7 @@ const EditProfilePage = observer(function EditProfilePage() {
   };
 
   return (
-    <div className={styles.page}>
+    <>
       <button type="button" className={styles.backBtn} onClick={() => navigate(ROUTES.PROFILE)}>
         ← Назад
       </button>
@@ -82,7 +82,7 @@ const EditProfilePage = observer(function EditProfilePage() {
           Отмена
         </button>
       </div>
-    </div>
+    </>
   );
 });
 

@@ -8,7 +8,7 @@ const ProfilePage = observer(function ProfilePage() {
   const { profile } = useProfile();
 
   return (
-    <div className={styles.page}>
+    <>
       <div className={styles.hero}>
         <div className={styles.avatar}>{profile.avatar}</div>
         <div className={styles.heroContent}>
@@ -36,7 +36,7 @@ const ProfilePage = observer(function ProfilePage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 });
 
