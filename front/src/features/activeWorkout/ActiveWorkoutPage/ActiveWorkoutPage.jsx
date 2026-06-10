@@ -13,8 +13,12 @@ import styles from './ActiveWorkoutPage.module.css';
 const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [pageError, setPageError] = useState('');
   const {
     isActive,
+    isHydrating,
+    isActionPending,
+    syncError,
     elapsed,
     running,
     notes,
@@ -31,13 +35,15 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
   const todayLabel = formatWorkoutDateRu(getTodayDateString());
 
   useEffect(() => {
-    if (!isActive) {
+    if (!isHydrating && !isActive) {
       navigate(ROUTES.NEW_WORKOUT, { replace: true });
     }
-  }, [isActive, navigate]);
+  }, [isActive, isHydrating, navigate]);
 
-  if (!isActive) {
-    return null;
+  if (isHydrating || !isActive) {
+    return isHydrating ? (
+      <div className={pageStyles.pageStatus}>Загрузка тренировки...</div>
+    ) : null;
   }
 
   const validate = () => {
@@ -62,7 +68,7 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
         isValid = false;
       }
 
-      if (exercise.weight == null || exercise.weight < 0) {
+      if (exercise.weight != null && exercise.weight < 0) {
         exerciseErrors.weight = '≥ 0';
         isValid = false;
       }
@@ -76,19 +82,33 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
     return isValid;
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!validate()) {
       return;
     }
 
-    finishWorkout();
-    navigate(ROUTES.WORKOUTS, { state: { toast: '✅ Тренировка сохранена!' } });
+    setPageError('');
+
+    try {
+      await finishWorkout();
+      navigate(ROUTES.WORKOUTS, { state: { toast: '✅ Тренировка сохранена!' } });
+    } catch {
+      setPageError(syncError || 'Не удалось завершить тренировку');
+    }
   };
 
-  const handleCancel = () => {
-    if (window.confirm('Отменить тренировку? Все несохранённые данные будут потеряны.')) {
-      cancelWorkout();
+  const handleCancel = async () => {
+    if (!globalThis.confirm('Отменить тренировку? Все несохранённые данные будут потеряны.')) {
+      return;
+    }
+
+    setPageError('');
+
+    try {
+      await cancelWorkout();
       navigate(ROUTES.WORKOUTS);
+    } catch {
+      setPageError(syncError || 'Не удалось отменить тренировку');
     }
   };
 
@@ -115,10 +135,20 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
             </div>
           </div>
           <div className={styles.timerControls}>
-            <button type="button" className={styles.btnTimerPause} onClick={togglePause}>
+            <button
+              type="button"
+              className={styles.btnTimerPause}
+              onClick={togglePause}
+              disabled={isActionPending}
+            >
               {running ? '⏸ Пауза' : '▶ Продолжить'}
             </button>
-            <button type="button" className={styles.btnTimerFinish} onClick={handleFinish}>
+            <button
+              type="button"
+              className={styles.btnTimerFinish}
+              onClick={handleFinish}
+              disabled={isActionPending}
+            >
               ✅ Завершить
             </button>
           </div>
@@ -129,6 +159,10 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
       <div className={`${pageStyles.pageSub} ${pageStyles.pageSubCompact}`}>
         Таймер продолжает идти при переключении страниц
       </div>
+
+      {(pageError || syncError) && (
+        <div className={pageStyles.pageError}>{pageError || syncError}</div>
+      )}
 
       <div className={formStyles.formCard}>
         <div className={formStyles.formSectionTitle}>Основная информация</div>
@@ -254,13 +288,15 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           type="button"
           className={`${formStyles.btnPrimary} ${formStyles.btnPrimaryLarge}`}
           onClick={handleFinish}
+          disabled={isActionPending}
         >
-          ✅ Завершить тренировку
+          {isActionPending ? 'Сохранение...' : '✅ Завершить тренировку'}
         </button>
         <button
           type="button"
           className={`${formStyles.btnOutline} ${formStyles.btnOutlineLarge}`}
           onClick={handleCancel}
+          disabled={isActionPending}
         >
           Отмена
         </button>

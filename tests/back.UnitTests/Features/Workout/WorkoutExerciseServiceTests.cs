@@ -57,6 +57,19 @@ public class WorkoutExerciseServiceTests
     }
 
     [Fact]
+    public void AddExerciseEntry_Strength_ZeroWeight_AddsEntry()
+    {
+        var workout = CreateWorkout();
+        var exercise = CreateExercise(ExerciseType.Strength);
+        var dto = CreateDto(weight: 0, reps: 10);
+
+        var result = _service.AddExerciseEntry(workout, exercise, dto);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(0, workout.ExerciseEntries.Single().Weight);
+    }
+
+    [Fact]
     public void AddExerciseEntry_Strength_Invalid_ReturnsFailure()
     {
         var workout = CreateWorkout();

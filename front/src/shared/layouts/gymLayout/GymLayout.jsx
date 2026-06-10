@@ -5,6 +5,7 @@ import { ROUTES } from '../../../constants/routes';
 import ActiveWorkoutBanner from '../../../features/activeWorkout/ActiveWorkoutBanner/ActiveWorkoutBanner';
 import ProfileAvatar from '../../../features/profile/ProfileAvatar/ProfileAvatar';
 import { useProfile } from '../../../features/profile/useProfile';
+import { authStore } from '../../stores/authStore';
 import { activeWorkoutStore } from '../../stores/activeWorkoutStore';
 import { NAV_TABS } from './constants';
 import styles from './GymLayout.module.css';
@@ -20,6 +21,15 @@ const GymLayout = observer(function GymLayout() {
   const hideNav = isActiveWorkout || isProfileEdit || isProfile;
   const profileLabel = profile?.name?.split(' ')[0] ?? 'Профиль';
   const showWorkoutBanner = activeWorkoutStore.isActive && !isActiveWorkout;
+  const isAuthReady = authStore.isInitialized && authStore.isAuthenticated;
+
+  useEffect(() => {
+    if (!isAuthReady) {
+      return;
+    }
+
+    activeWorkoutStore.hydrateFromServer();
+  }, [isAuthReady]);
 
   useEffect(() => {
     if (location.state?.toast) {

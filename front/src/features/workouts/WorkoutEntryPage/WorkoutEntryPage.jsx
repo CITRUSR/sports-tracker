@@ -198,7 +198,8 @@ function WorkoutEntryPage() {
                     onChange={(event) =>
                       updateExercise(exercise.id, 'weight', Number(event.target.value))
                     }
-                    min={1}
+                    min={0}
+                    step={0.5}
                   />
                 </div>
               </div>

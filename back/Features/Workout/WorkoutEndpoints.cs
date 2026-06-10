@@ -31,6 +31,23 @@ public class WorkoutEndpoints : IEndpointMarker
         .WithDescription("Get workouts filtered by date range and optional exercise")
         .Produces(StatusCodes.Status200OK, typeof(List<WorkoutDto>));
 
+        app.MapGet($"{_baseRoute}/active", async ([FromServices] IWorkoutService workoutService, HttpContext context,
+            CancellationToken cancellationToken) =>
+        {
+            var userId = context.User.GetId();
+
+            var activeWorkout = await workoutService.GetActiveAsync(userId, cancellationToken);
+            if (activeWorkout == null)
+                return Results.NotFound();
+
+            return Results.Ok(activeWorkout);
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Get the current active workout")
+        .Produces(StatusCodes.Status200OK, typeof(ActiveWorkoutDto))
+        .Produces(StatusCodes.Status404NotFound);
+
         app.MapPost(_baseRoute, async ([FromServices] IWorkoutService workoutService, HttpContext context) =>
         {
             var userId = context.User.GetId();
@@ -62,6 +79,23 @@ public class WorkoutEndpoints : IEndpointMarker
         .RequireAuthorization()
         .WithTags(_tag)
         .WithDescription("Finish workout")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound, typeof(string));
+
+        app.MapDelete($"{_baseRoute}/active", async ([FromServices] IWorkoutService workoutService, HttpContext context,
+            CancellationToken cancellationToken) =>
+        {
+            var userId = context.User.GetId();
+
+            var result = await workoutService.CancelAsync(userId, cancellationToken);
+            if (!result.IsSuccess)
+                return Results.NotFound(result.ErrorsString);
+
+            return Results.Ok();
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Cancel the active workout")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound, typeof(string));
 
