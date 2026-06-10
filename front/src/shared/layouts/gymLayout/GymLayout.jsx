@@ -15,10 +15,10 @@ const GymLayout = observer(function GymLayout() {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
   const { profile } = useProfile();
-  const isActiveWorkout = location.pathname === ROUTES.ACTIVE_WORKOUT;
   const isProfileEdit = location.pathname === ROUTES.PROFILE_EDIT;
   const isProfile = location.pathname === ROUTES.PROFILE;
-  const hideNav = isActiveWorkout || isProfileEdit || isProfile;
+  const isActiveWorkout = location.pathname === ROUTES.ACTIVE_WORKOUT;
+  const hideNav = isProfileEdit || isProfile;
   const profileLabel = profile?.name?.split(' ')[0] ?? 'Профиль';
   const showWorkoutBanner = activeWorkoutStore.isActive && !isActiveWorkout;
   const isAuthReady = authStore.isInitialized && authStore.isAuthenticated;

@@ -1,8 +1,7 @@
-export const ACTIVE_WORKOUT_STORAGE_KEY = 'gymtracker-active-workout';
-
 export function createExerciseRow() {
   return {
-    id: Date.now(),
+    clientKey: `draft-${Date.now()}`,
+    entryIds: [],
     exerciseId: '',
     sets: 3,
     reps: 10,

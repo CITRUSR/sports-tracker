@@ -2,28 +2,12 @@ import { makeAutoObservable } from 'mobx';
 import api from '../../features/api/api';
 import {
   calculateElapsedSeconds,
-  expandExerciseRowsToEntries,
+  createExerciseGroup,
+  deleteExerciseGroup,
   groupEntriesToExerciseRows,
+  updateExerciseGroup,
 } from '../../features/activeWorkout/activeWorkoutSync';
-import {
-  ACTIVE_WORKOUT_STORAGE_KEY,
-  createExerciseRow,
-  getTodayDateString,
-} from '../../features/activeWorkout/activeWorkoutUtils';
-
-function readStoredWorkout() {
-  try {
-    const raw = sessionStorage.getItem(ACTIVE_WORKOUT_STORAGE_KEY);
-
-    if (!raw) {
-      return null;
-    }
-
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
+import { createExerciseRow, getTodayDateString } from '../../features/activeWorkout/activeWorkoutUtils';
 
 class ActiveWorkoutStore {
   isActive = false;
@@ -35,61 +19,13 @@ class ActiveWorkoutStore {
   running = false;
   date = getTodayDateString();
   notes = '';
-  exercises = [createExerciseRow()];
+  exercises = [];
+  draftExercise = null;
   _timerId = null;
 
   constructor() {
     makeAutoObservable(this);
-    this.restore();
   }
-
-  persist = () => {
-    if (!this.isActive) {
-      sessionStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
-      return;
-    }
-
-    sessionStorage.setItem(
-      ACTIVE_WORKOUT_STORAGE_KEY,
-      JSON.stringify({
-        workoutId: this.workoutId,
-        isActive: this.isActive,
-        elapsed: this.elapsed,
-        running: this.running,
-        date: this.date,
-        notes: this.notes,
-        exercises: this.exercises,
-      }),
-    );
-  };
-
-  restore = () => {
-    const stored = readStoredWorkout();
-
-    if (!stored?.isActive) {
-      return;
-    }
-
-    this.isActive = true;
-    this.workoutId = stored.workoutId ?? null;
-    this.elapsed = stored.elapsed ?? 0;
-    this.running = stored.running ?? false;
-    this.date = getTodayDateString();
-    this.notes = stored.notes ?? '';
-    this.exercises = stored.exercises?.length
-      ? stored.exercises.map((exercise) => ({
-          id: exercise.id ?? Date.now(),
-          exerciseId: exercise.exerciseId ?? '',
-          sets: exercise.sets ?? 3,
-          reps: exercise.reps ?? 10,
-          weight: exercise.weight ?? 0,
-        }))
-      : [createExerciseRow()];
-
-    if (this.running) {
-      this.startTimer();
-    }
-  };
 
   applyActiveWorkout = (activeWorkout) => {
     this.workoutId = activeWorkout.id;
@@ -100,7 +36,6 @@ class ActiveWorkoutStore {
     this.elapsed = calculateElapsedSeconds(activeWorkout);
     this.exercises = groupEntriesToExerciseRows(activeWorkout.entries);
     this.syncError = '';
-    this.persist();
   };
 
   reset = () => {
@@ -113,8 +48,8 @@ class ActiveWorkoutStore {
     this.running = false;
     this.date = getTodayDateString();
     this.notes = '';
-    this.exercises = [createExerciseRow()];
-    this.persist();
+    this.exercises = [];
+    this.draftExercise = null;
   };
 
   startTimer = () => {
@@ -125,7 +60,6 @@ class ActiveWorkoutStore {
     this._timerId = setInterval(() => {
       if (this.running) {
         this.elapsed += 1;
-        this.persist();
       }
     }, 1000);
   };
@@ -137,43 +71,31 @@ class ActiveWorkoutStore {
     }
   };
 
+  refreshFromServer = async () => {
+    const activeWorkout = await api.getActiveWorkout();
+
+    if (!activeWorkout) {
+      this.reset();
+      return null;
+    }
+
+    this.applyActiveWorkout(activeWorkout);
+
+    if (this.running) {
+      this.startTimer();
+    } else {
+      this.stopTimer();
+    }
+
+    return activeWorkout;
+  };
+
   hydrateFromServer = async () => {
     this.isHydrating = true;
     this.syncError = '';
 
     try {
-      const activeWorkout = await api.getActiveWorkout();
-
-      if (!activeWorkout) {
-        if (this.isActive) {
-          this.reset();
-        }
-
-        return null;
-      }
-
-      this.applyActiveWorkout(activeWorkout);
-
-      const stored = readStoredWorkout();
-
-      if (stored?.workoutId === activeWorkout.id && stored.exercises?.length) {
-        this.exercises = stored.exercises.map((exercise) => ({
-          id: exercise.id ?? Date.now(),
-          exerciseId: exercise.exerciseId ?? '',
-          sets: exercise.sets ?? 3,
-          reps: exercise.reps ?? 10,
-          weight: exercise.weight ?? 0,
-        }));
-        this.notes = stored.notes ?? this.notes;
-        this.persist();
-      }
-
-      if (this.running) {
-        this.startTimer();
-      } else {
-        this.stopTimer();
-      }
-
+      const activeWorkout = await this.refreshFromServer();
       return activeWorkout;
     } catch {
       this.syncError = 'Не удалось загрузить активную тренировку';
@@ -202,17 +124,11 @@ class ActiveWorkoutStore {
         throw new Error('Active workout not found');
       }
 
-      const isNewSession = !this.workoutId || this.workoutId !== activeWorkout.id;
-
       this.applyActiveWorkout(activeWorkout);
-
-      if (isNewSession) {
-        this.elapsed = 0;
-        this.exercises = [createExerciseRow()];
-        this.notes = '';
-      }
-
-      this.persist();
+      this.elapsed = 0;
+      this.exercises = [];
+      this.draftExercise = null;
+      this.notes = '';
 
       if (this.running) {
         this.startTimer();
@@ -240,19 +156,7 @@ class ActiveWorkoutStore {
         await api.resumeWorkout();
       }
 
-      const activeWorkout = await api.getActiveWorkout();
-
-      if (activeWorkout) {
-        this.running = !activeWorkout.isPaused;
-        this.elapsed = calculateElapsedSeconds(activeWorkout);
-        this.persist();
-
-        if (this.running) {
-          this.startTimer();
-        } else {
-          this.stopTimer();
-        }
-      }
+      await this.refreshFromServer();
     } catch {
       this.syncError = 'Не удалось изменить состояние паузы';
     } finally {
@@ -262,26 +166,102 @@ class ActiveWorkoutStore {
 
   setNotes = (notes) => {
     this.notes = notes;
-    this.persist();
   };
 
-  addExercise = () => {
-    this.exercises = [...this.exercises, createExerciseRow()];
-    this.persist();
+  beginDraftExercise = () => {
+    if (this.draftExercise) {
+      return;
+    }
+
+    this.draftExercise = createExerciseRow();
   };
 
-  removeExercise = (id) => {
-    if (this.exercises.length > 1) {
-      this.exercises = this.exercises.filter((exercise) => exercise.id !== id);
-      this.persist();
+  cancelDraftExercise = () => {
+    this.draftExercise = null;
+  };
+
+  updateDraftExercise = (field, value) => {
+    if (!this.draftExercise) {
+      return;
+    }
+
+    this.draftExercise = { ...this.draftExercise, [field]: value };
+  };
+
+  updateExercise = (clientKey, field, value) => {
+    this.exercises = this.exercises.map((exercise) =>
+      exercise.clientKey === clientKey ? { ...exercise, [field]: value } : exercise,
+    );
+  };
+
+  saveDraftExercise = async () => {
+    if (!this.workoutId || !this.draftExercise) {
+      return;
+    }
+
+    this.isActionPending = true;
+    this.syncError = '';
+
+    try {
+      await createExerciseGroup(this.workoutId, this.draftExercise, api);
+      this.draftExercise = null;
+      await this.refreshFromServer();
+    } catch {
+      this.syncError = 'Не удалось сохранить упражнение';
+      throw new Error('Не удалось сохранить упражнение');
+    } finally {
+      this.isActionPending = false;
     }
   };
 
-  updateExercise = (id, field, value) => {
-    this.exercises = this.exercises.map((exercise) =>
-      exercise.id === id ? { ...exercise, [field]: value } : exercise,
-    );
-    this.persist();
+  saveExercise = async (clientKey) => {
+    if (!this.workoutId) {
+      return;
+    }
+
+    const exercise = this.exercises.find((item) => item.clientKey === clientKey);
+
+    if (!exercise) {
+      return;
+    }
+
+    this.isActionPending = true;
+    this.syncError = '';
+
+    try {
+      await updateExerciseGroup(this.workoutId, exercise, api);
+      await this.refreshFromServer();
+    } catch {
+      this.syncError = 'Не удалось обновить упражнение';
+      throw new Error('Не удалось обновить упражнение');
+    } finally {
+      this.isActionPending = false;
+    }
+  };
+
+  removeExercise = async (clientKey) => {
+    if (!this.workoutId) {
+      return;
+    }
+
+    const exercise = this.exercises.find((item) => item.clientKey === clientKey);
+
+    if (!exercise) {
+      return;
+    }
+
+    this.isActionPending = true;
+    this.syncError = '';
+
+    try {
+      await deleteExerciseGroup(this.workoutId, exercise.entryIds, api);
+      await this.refreshFromServer();
+    } catch {
+      this.syncError = 'Не удалось удалить упражнение';
+      throw new Error('Не удалось удалить упражнение');
+    } finally {
+      this.isActionPending = false;
+    }
   };
 
   finishWorkout = async () => {
@@ -293,12 +273,6 @@ class ActiveWorkoutStore {
     this.syncError = '';
 
     try {
-      const entries = expandExerciseRowsToEntries(this.exercises);
-
-      for (const entry of entries) {
-        await api.addExerciseEntry(this.workoutId, entry);
-      }
-
       await api.finishWorkout(this.notes);
       this.reset();
     } catch {

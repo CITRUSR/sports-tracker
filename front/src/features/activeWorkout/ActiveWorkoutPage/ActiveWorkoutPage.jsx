@@ -6,7 +6,8 @@ import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSe
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { activeWorkoutStore } from '../../../shared/stores/activeWorkoutStore';
 import formStyles from '../../workouts/WorkoutEntryPage/WorkoutEntryPage.module.css';
-import { useWorkoutEntry } from '../../workouts/useWorkoutEntry';
+import { useExerciseOptions } from '../../workouts/useExerciseOptions';
+import { validateExerciseRow } from '../activeWorkoutSync';
 import { formatElapsed, formatWorkoutDateRu, getTodayDateString } from '../activeWorkoutUtils';
 import styles from './ActiveWorkoutPage.module.css';
 
@@ -23,16 +24,25 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
     running,
     notes,
     exercises,
+    draftExercise,
     togglePause,
     setNotes,
-    addExercise,
-    removeExercise,
+    beginDraftExercise,
+    cancelDraftExercise,
+    updateDraftExercise,
     updateExercise,
+    saveDraftExercise,
+    saveExercise,
+    removeExercise,
     finishWorkout,
     cancelWorkout,
   } = activeWorkoutStore;
-  const { exerciseOptions, isLoadingExercises } = useWorkoutEntry();
+  const { exerciseOptions, isLoadingExercises } = useExerciseOptions();
   const todayLabel = formatWorkoutDateRu(getTodayDateString());
+
+  useEffect(() => {
+    activeWorkoutStore.refreshFromServer();
+  }, []);
 
   useEffect(() => {
     if (!isHydrating && !isActive) {
@@ -46,44 +56,63 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
     ) : null;
   }
 
-  const validate = () => {
-    const nextErrors = {};
-    let isValid = true;
+  const validateRow = (row) => {
+    const rowErrors = validateExerciseRow(row);
+    setErrors((current) => ({ ...current, [row.clientKey]: rowErrors }));
+    return Object.keys(rowErrors).length === 0;
+  };
 
-    exercises.forEach((exercise) => {
-      const exerciseErrors = {};
+  const handleSaveDraft = async () => {
+    if (!draftExercise || !validateRow(draftExercise)) {
+      return;
+    }
 
-      if (!exercise.exerciseId) {
-        exerciseErrors.exerciseId = 'Выберите упражнение';
-        isValid = false;
-      }
+    setPageError('');
 
-      if (!exercise.sets || exercise.sets < 1) {
-        exerciseErrors.sets = 'Мин. 1';
-        isValid = false;
-      }
+    try {
+      await saveDraftExercise();
+      setErrors({});
+    } catch {
+      setPageError(syncError || 'Не удалось сохранить упражнение');
+    }
+  };
 
-      if (!exercise.reps || exercise.reps < 1) {
-        exerciseErrors.reps = 'Мин. 1';
-        isValid = false;
-      }
+  const handleSaveExercise = async (exercise) => {
+    if (!validateRow(exercise)) {
+      return;
+    }
 
-      if (exercise.weight != null && exercise.weight < 0) {
-        exerciseErrors.weight = '≥ 0';
-        isValid = false;
-      }
+    setPageError('');
 
-      if (Object.keys(exerciseErrors).length) {
-        nextErrors[exercise.id] = exerciseErrors;
-      }
-    });
+    try {
+      await saveExercise(exercise.clientKey);
+      setErrors((current) => {
+        const next = { ...current };
+        delete next[exercise.clientKey];
+        return next;
+      });
+    } catch {
+      setPageError(syncError || 'Не удалось обновить упражнение');
+    }
+  };
 
-    setErrors(nextErrors);
-    return isValid;
+  const handleRemoveExercise = async (clientKey) => {
+    if (!globalThis.confirm('Удалить упражнение из тренировки?')) {
+      return;
+    }
+
+    setPageError('');
+
+    try {
+      await removeExercise(clientKey);
+    } catch {
+      setPageError(syncError || 'Не удалось удалить упражнение');
+    }
   };
 
   const handleFinish = async () => {
-    if (!validate()) {
+    if (draftExercise) {
+      setPageError('Сохраните или отмените добавляемое упражнение');
       return;
     }
 
@@ -98,7 +127,7 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
   };
 
   const handleCancel = async () => {
-    if (!globalThis.confirm('Отменить тренировку? Все несохранённые данные будут потеряны.')) {
+    if (!globalThis.confirm('Отменить тренировку? Все данные будут удалены.')) {
       return;
     }
 
@@ -121,6 +150,119 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
       </span>
     </div>
   );
+
+  const renderExerciseForm = (exercise, { isDraft, index }) => {
+    const exerciseErrors = errors[exercise.clientKey] || {};
+    const hasError = Object.keys(exerciseErrors).length > 0;
+    const onChange = isDraft
+      ? (field, value) => updateDraftExercise(field, value)
+      : (field, value) => updateExercise(exercise.clientKey, field, value);
+
+    return (
+      <div
+        className={`${formStyles.exerciseCard} ${hasError ? styles.exerciseCardError : ''}`}
+        key={exercise.clientKey}
+      >
+        <div className={formStyles.exerciseHeader}>
+          <div className={formStyles.exerciseLabel}>
+            {isDraft ? 'Новое упражнение' : `Упражнение ${index + 1}`}
+          </div>
+          {!isDraft && (
+            <button
+              type="button"
+              className={formStyles.btnDanger}
+              onClick={() => handleRemoveExercise(exercise.clientKey)}
+              disabled={isActionPending}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        <div className={styles.exerciseGrid}>
+          {renderField(
+            'Упражнение',
+            exerciseErrors.exerciseId,
+            <ExerciseSelect
+              id={`active-exercise-${exercise.clientKey}`}
+              exercises={exerciseOptions}
+              value={exercise.exerciseId}
+              onChange={(nextExerciseId) => onChange('exerciseId', nextExerciseId)}
+              loading={isLoadingExercises}
+              error={Boolean(exerciseErrors.exerciseId)}
+            />,
+          )}
+          {renderField(
+            'Подходы',
+            exerciseErrors.sets,
+            <input
+              type="number"
+              className={`${formStyles.formInput} ${exerciseErrors.sets ? styles.formInputError : ''}`}
+              value={exercise.sets}
+              onChange={(event) => onChange('sets', Number(event.target.value))}
+              min={1}
+              disabled={isActionPending}
+            />,
+          )}
+          {renderField(
+            'Повторения',
+            exerciseErrors.reps,
+            <input
+              type="number"
+              className={`${formStyles.formInput} ${exerciseErrors.reps ? styles.formInputError : ''}`}
+              value={exercise.reps}
+              onChange={(event) => onChange('reps', Number(event.target.value))}
+              min={1}
+              disabled={isActionPending}
+            />,
+          )}
+          {renderField(
+            'Вес (кг)',
+            exerciseErrors.weight,
+            <input
+              type="number"
+              className={`${formStyles.formInput} ${exerciseErrors.weight ? styles.formInputError : ''}`}
+              value={exercise.weight}
+              onChange={(event) => onChange('weight', Number(event.target.value))}
+              min={0}
+              step={0.5}
+              disabled={isActionPending}
+            />,
+          )}
+        </div>
+        <div className={styles.exerciseActions}>
+          {isDraft ? (
+            <>
+              <button
+                type="button"
+                className={`${formStyles.btnPrimary} ${formStyles.btnPrimarySmall}`}
+                onClick={handleSaveDraft}
+                disabled={isActionPending || isLoadingExercises}
+              >
+                Сохранить
+              </button>
+              <button
+                type="button"
+                className={styles.btnOutlineSmall}
+                onClick={cancelDraftExercise}
+                disabled={isActionPending}
+              >
+                Отмена
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className={`${formStyles.btnPrimary} ${formStyles.btnPrimarySmall}`}
+              onClick={() => handleSaveExercise(exercise)}
+              disabled={isActionPending || isLoadingExercises}
+            >
+              Сохранить изменения
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -157,7 +299,7 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
 
       <div className={pageStyles.pageTitle}>Активная тренировка</div>
       <div className={`${pageStyles.pageSub} ${pageStyles.pageSubCompact}`}>
-        Таймер продолжает идти при переключении страниц
+        Упражнения сохраняются сразу на сервер
       </div>
 
       {(pageError || syncError) && (
@@ -180,8 +322,8 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           <button
             type="button"
             className={`${formStyles.btnPrimary} ${formStyles.btnPrimarySmall}`}
-            onClick={addExercise}
-            disabled={isLoadingExercises}
+            onClick={beginDraftExercise}
+            disabled={isLoadingExercises || isActionPending || Boolean(draftExercise)}
           >
             + Добавить упражнение
           </button>
@@ -190,86 +332,19 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
         {isLoadingExercises ? (
           <div className={pageStyles.pageStatus}>Загрузка упражнений...</div>
         ) : (
-          exercises.map((exercise, index) => {
-          const exerciseErrors = errors[exercise.id] || {};
-          const hasError = Object.keys(exerciseErrors).length > 0;
+          <>
+            {exercises.length === 0 && !draftExercise && (
+              <div className={styles.emptyExercises}>
+                Упражнений пока нет. Нажмите «Добавить упражнение», чтобы записать первое.
+              </div>
+            )}
 
-          return (
-            <div
-              className={`${formStyles.exerciseCard} ${hasError ? styles.exerciseCardError : ''}`}
-              key={exercise.id}
-            >
-              <div className={formStyles.exerciseHeader}>
-                <div className={formStyles.exerciseLabel}>Упражнение {index + 1}</div>
-                {exercises.length > 1 && (
-                  <button
-                    type="button"
-                    className={formStyles.btnDanger}
-                    onClick={() => removeExercise(exercise.id)}
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-              <div className={styles.exerciseGrid}>
-                {renderField(
-                  'Упражнение',
-                  exerciseErrors.exerciseId,
-                  <ExerciseSelect
-                    id={`active-exercise-${exercise.id}`}
-                    exercises={exerciseOptions}
-                    value={exercise.exerciseId}
-                    onChange={(nextExerciseId) =>
-                      updateExercise(exercise.id, 'exerciseId', nextExerciseId)
-                    }
-                    loading={isLoadingExercises}
-                    error={Boolean(exerciseErrors.exerciseId)}
-                  />,
-                )}
-                {renderField(
-                  'Подходы',
-                  exerciseErrors.sets,
-                  <input
-                    type="number"
-                    className={`${formStyles.formInput} ${exerciseErrors.sets ? styles.formInputError : ''}`}
-                    value={exercise.sets}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'sets', Number(event.target.value))
-                    }
-                    min={1}
-                  />,
-                )}
-                {renderField(
-                  'Повторения',
-                  exerciseErrors.reps,
-                  <input
-                    type="number"
-                    className={`${formStyles.formInput} ${exerciseErrors.reps ? styles.formInputError : ''}`}
-                    value={exercise.reps}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'reps', Number(event.target.value))
-                    }
-                    min={1}
-                  />,
-                )}
-                {renderField(
-                  'Вес (кг)',
-                  exerciseErrors.weight,
-                  <input
-                    type="number"
-                    className={`${formStyles.formInput} ${exerciseErrors.weight ? styles.formInputError : ''}`}
-                    value={exercise.weight}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'weight', Number(event.target.value))
-                    }
-                    min={0}
-                    step={0.5}
-                  />,
-                )}
-              </div>
-            </div>
-          );
-        })
+            {exercises.map((exercise, index) =>
+              renderExerciseForm(exercise, { isDraft: false, index }),
+            )}
+
+            {draftExercise && renderExerciseForm(draftExercise, { isDraft: true, index: 0 })}
+          </>
         )}
       </div>
 
@@ -280,6 +355,7 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           placeholder="Добавьте заметки о тренировке..."
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
+          disabled={isActionPending}
         />
       </div>
 
