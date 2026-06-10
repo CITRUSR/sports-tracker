@@ -5,21 +5,20 @@ namespace back.Features.Workout;
 
 public class WorkoutPauseService : IWorkoutPauseService
 {
-    public Result Pause(Domain.Workout workout)
+    public Result<WorkoutPause> Pause(Domain.Workout workout)
     {
         if (GetActivePause(workout) != null)
-            return Result.Failure("Workout is already paused");
+            return Result<WorkoutPause>.Failure("Workout is already paused");
 
         var now = DateTimeOffset.UtcNow;
         var pause = new WorkoutPause
         {
+            Id = Guid.NewGuid(),
             WorkoutId = workout.Id,
             StartTime = new TimeOnly(now.Hour, now.Minute, now.Second)
         };
 
-        workout.Pauses.Add(pause);
-
-        return Result.Success();
+        return Result<WorkoutPause>.Success(pause);
     }
 
     public Result Resume(Domain.Workout workout)
@@ -34,7 +33,7 @@ public class WorkoutPauseService : IWorkoutPauseService
         return Result.Success();
     }
 
-    public WorkoutPause GetActivePause(Domain.Workout workout)
+    public WorkoutPause? GetActivePause(Domain.Workout workout)
     {
         return workout.Pauses.FirstOrDefault(x => x.EndTime == null);
     }

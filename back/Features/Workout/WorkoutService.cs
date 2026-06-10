@@ -137,8 +137,9 @@ public class WorkoutService : IWorkoutService
 
         var pauseResult = _pauseService.Pause(activeWorkout);
         if (!pauseResult.IsSuccess)
-            return pauseResult;
+            return Result.Failure(pauseResult.ErrorsString);
 
+        await _dbContext.WorkoutPauses.AddAsync(pauseResult.Data, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }

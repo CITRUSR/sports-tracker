@@ -5,6 +5,7 @@ namespace back.Domain;
 
 public class WorkoutPause
 {
+    public Guid Id { get; set; }
     public Guid WorkoutId { get; set; }
     public Workout Workout { get; set; }
     public TimeOnly StartTime { get; set; }
@@ -15,7 +16,8 @@ public class WorkoutPauseConfiguration : IEntityTypeConfiguration<WorkoutPause>
 {
     public void Configure(EntityTypeBuilder<WorkoutPause> builder)
     {
-        builder.HasKey(x => x.WorkoutId);
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.Id).ValueGeneratedNever();
 
         builder.HasOne(x => x.Workout)
             .WithMany(x => x.Pauses)
