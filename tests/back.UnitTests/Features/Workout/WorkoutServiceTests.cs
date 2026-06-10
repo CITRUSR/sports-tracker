@@ -36,6 +36,9 @@ public class WorkoutServiceTests
         mock.Setup(x => x.ExerciseEntries)
             .Returns(exerciseEntriesMock.Object);
 
+        mock.Setup(x => x.WorkoutPauses)
+            .Returns(entryContext.WorkoutPauses);
+
         mock.Setup(x => x.Workouts.AddAsync(It.IsAny<Domain.Workout>(), It.IsAny<CancellationToken>()))
             .Callback<Domain.Workout, CancellationToken>((w, _) => workouts.Add(w));
 
@@ -50,7 +53,18 @@ public class WorkoutServiceTests
         var mock = new Mock<IWorkoutPauseService>();
 
         mock.Setup(x => x.Pause(It.IsAny<Domain.Workout>()))
-            .Returns(pauseResult ?? Result.Success());
+            .Returns((Domain.Workout workout) =>
+            {
+                if (pauseResult != null && !pauseResult.IsSuccess)
+                    return Result<WorkoutPause>.Failure(pauseResult.ErrorsString);
+
+                return Result<WorkoutPause>.Success(new WorkoutPause
+                {
+                    Id = Guid.NewGuid(),
+                    WorkoutId = workout.Id,
+                    StartTime = TimeOnly.FromDateTime(DateTime.UtcNow)
+                });
+            });
 
         mock.Setup(x => x.Resume(It.IsAny<Domain.Workout>()))
             .Returns(Result.Success());

@@ -5,7 +5,7 @@ namespace back.Features.Workout;
 
 public interface IWorkoutPauseService
 {
-    Result Pause(Domain.Workout workout);
+    Result<WorkoutPause> Pause(Domain.Workout workout);
     Result Resume(Domain.Workout workout);
-    WorkoutPause GetActivePause(Domain.Workout workout);
+    WorkoutPause? GetActivePause(Domain.Workout workout);
 }

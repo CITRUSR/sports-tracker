@@ -40,6 +40,33 @@ public class WorkoutService : IWorkoutService
         return Result.Success();
     }
 
+    public async Task<ActiveWorkoutDto?> GetActiveAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var activeWorkout = await _dbContext.Workouts.AsNoTracking()
+            .Include(x => x.ExerciseEntries)
+            .ThenInclude(x => x.Exercise)
+            .Include(x => x.Pauses)
+            .Where(x => x.UserId == userId && x.TimeEnd == null)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (activeWorkout == null)
+            return null;
+
+        return MapActiveWorkout(activeWorkout);
+    }
+
+    public async Task<Result> CancelAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken);
+        if (activeWorkout == null)
+            return Result.Failure("No workouts in progress");
+
+        _dbContext.Workouts.Remove(activeWorkout);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
     public async Task<Result> FinishAsync(string userId, string comment, CancellationToken cancellationToken = default)
     {
         var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken: cancellationToken);
@@ -102,6 +129,37 @@ public class WorkoutService : IWorkoutService
         return workouts;
     }
 
+    public async Task<WorkoutDto?> GetByIdAsync(string userId, Guid workoutId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Workouts.AsNoTracking()
+            .Where(x => x.Id == workoutId && x.UserId == userId)
+            .Select(x => new WorkoutDto
+            {
+                Id = x.Id,
+                Comment = x.Comment,
+                Date = x.Date,
+                TimeEnd = x.TimeEnd,
+                TimeStart = x.TimeStart,
+                Exercises = x.ExerciseEntries.Select(entry => new ExerciseDto
+                {
+                    Id = entry.ExerciseId,
+                    Distance = entry.Distance,
+                    Repetitions = entry.Repetitions,
+                    Weight = entry.Weight,
+                    Name = entry.Exercise.Name,
+                    Type = entry.Exercise.Type,
+                    Duration = entry.Duration,
+                }).ToList(),
+                Pauses = x.Pauses.Select(p => new PauseDto
+                {
+                    StartTime = p.StartTime,
+                    EndTime = p.EndTime,
+                }).ToList(),
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Result> PauseAsync(string userId, CancellationToken cancellationToken = default)
     {
         var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken);
@@ -110,8 +168,9 @@ public class WorkoutService : IWorkoutService
 
         var pauseResult = _pauseService.Pause(activeWorkout);
         if (!pauseResult.IsSuccess)
-            return pauseResult;
+            return Result.Failure(pauseResult.ErrorsString);
 
+        await _dbContext.WorkoutPauses.AddAsync(pauseResult.Data, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return Result.Success();
     }
@@ -182,6 +241,33 @@ public class WorkoutService : IWorkoutService
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
+    }
+
+    private static ActiveWorkoutDto MapActiveWorkout(Domain.Workout workout)
+    {
+        return new ActiveWorkoutDto
+        {
+            Id = workout.Id,
+            Date = workout.Date,
+            TimeStart = workout.TimeStart,
+            Comment = workout.Comment,
+            IsPaused = workout.Pauses.Any(x => x.EndTime == null),
+            Pauses = workout.Pauses.Select(p => new PauseDto
+            {
+                StartTime = p.StartTime,
+                EndTime = p.EndTime,
+            }).ToList(),
+            Entries = workout.ExerciseEntries.Select(entry => new ExerciseEntryItemDto
+            {
+                EntryId = entry.Id,
+                ExerciseId = entry.ExerciseId,
+                ExerciseName = entry.Exercise.Name,
+                Weight = entry.Weight,
+                Distance = entry.Distance,
+                Repetitions = entry.Repetitions,
+                Duration = entry.Duration,
+            }).ToList(),
+        };
     }
 
     private async Task<Domain.Workout?> GetActiveWorkoutAsync(string userId, bool includePauses = false,

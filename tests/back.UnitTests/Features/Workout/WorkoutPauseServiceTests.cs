@@ -28,12 +28,12 @@ public class WorkoutPauseServiceTests
         var result = service.Pause(workout);
 
         Assert.True(result.IsSuccess);
-        Assert.Single(workout.Pauses);
 
-        var pause = workout.Pauses.First();
-        Assert.NotNull(pause.StartTime);
+        var pause = result.Data;
+        Assert.NotEqual(Guid.Empty, pause.Id);
         Assert.Null(pause.EndTime);
         Assert.Equal(workout.Id, pause.WorkoutId);
+        Assert.Empty(workout.Pauses);
     }
 
     [Fact]
@@ -45,6 +45,7 @@ public class WorkoutPauseServiceTests
         {
             new WorkoutPause
             {
+                Id = Guid.NewGuid(),
                 WorkoutId = Guid.NewGuid(),
                 StartTime = new TimeOnly(10, 0),
                 EndTime = null
@@ -78,6 +79,7 @@ public class WorkoutPauseServiceTests
         {
             new WorkoutPause
             {
+                Id = Guid.NewGuid(),
                 WorkoutId = Guid.NewGuid(),
                 StartTime = new TimeOnly(10, 0),
                 EndTime = null
@@ -100,12 +102,30 @@ public class WorkoutPauseServiceTests
 
         var pauseResult = service.Pause(workout);
         Assert.True(pauseResult.IsSuccess);
+        workout.Pauses.Add(pauseResult.Data);
 
         var resumeResult = service.Resume(workout);
         Assert.True(resumeResult.IsSuccess);
 
         var pause = workout.Pauses.First();
-        Assert.NotNull(pause.StartTime);
         Assert.NotNull(pause.EndTime);
+    }
+
+    [Fact]
+    public void Pause_AfterResume_AllowsSecondPause()
+    {
+        var service = CreateService();
+        var workout = CreateWorkoutWithPauses();
+
+        var firstPause = service.Pause(workout);
+        Assert.True(firstPause.IsSuccess);
+        workout.Pauses.Add(firstPause.Data);
+
+        Assert.True(service.Resume(workout).IsSuccess);
+
+        var secondPauseResult = service.Pause(workout);
+
+        Assert.True(secondPauseResult.IsSuccess);
+        Assert.NotEqual(firstPause.Data.Id, secondPauseResult.Data.Id);
     }
 }

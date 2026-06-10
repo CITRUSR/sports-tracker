@@ -117,6 +117,7 @@ export default {
   login: async (model) => {
     const token = await BaseApi.post('auth/login', model);
     applyAuthToken(token);
+    authStore.setLogin(model.login);
     return token;
   },
   register: (model) => BaseApi.post('auth/register', model),
@@ -125,7 +126,14 @@ export default {
     applyAuthToken(token);
     return token;
   },
-  clearAuth: () => applyAuthToken(null),
+  clearAuth: () => {
+    applyAuthToken(null);
+    authStore.clearLogin();
+  },
+
+  getProfile: () => BaseApi.get('profiles'),
+  createProfile: (model) => BaseApi.post('profiles', model),
+  updateProfile: (model) => BaseApi.put('profiles', model),
 
   getStatistics: () => BaseApi.get('statistics'),
   getExercises: () => BaseApi.get('exercises'),
@@ -138,13 +146,42 @@ export default {
 
     return BaseApi.get(`workouts?${params.toString()}`);
   },
+  getWorkout: async (workoutId) => {
+    try {
+      return await BaseApi.get(`workouts/${workoutId}`);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+
+      throw error;
+    }
+  },
+  getActiveWorkout: async () => {
+    try {
+      return await BaseApi.get('workouts/active');
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+
+      throw error;
+    }
+  },
   beginWorkout: () => BaseApi.post('workouts', {}),
   finishWorkout: (comment) =>
     BaseApi.post('workouts/finish', comment ?? '', {
       headers: { 'Content-Type': 'application/json' },
       transformRequest: [(data) => JSON.stringify(data)],
     }),
+  pauseWorkout: () => BaseApi.post('workouts/pause', {}),
+  resumeWorkout: () => BaseApi.post('workouts/resume', {}),
+  cancelWorkout: () => BaseApi.delete('workouts/active'),
   addExerciseEntry: (workoutId, entry) =>
     BaseApi.post(`workouts/${workoutId}/exercise-entries`, entry),
+  updateExerciseEntry: (workoutId, entryId, entry) =>
+    BaseApi.put(`workouts/${workoutId}/exercise-entries/${entryId}`, entry),
+  removeExerciseEntry: (workoutId, entryId) =>
+    BaseApi.delete(`workouts/${workoutId}/exercise-entries/${entryId}`),
   createExercise: (name, type = 20) => BaseApi.post('exercises', { name, type }),
 };

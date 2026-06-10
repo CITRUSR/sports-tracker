@@ -1,0 +1,31 @@
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.icon {
+  width: 48px;
+  height: 48px;
+}
+
+.avatarHeader {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border-width: 0;
+  background: linear-gradient(135deg, #3b5bf5 0%, #9b59f5 100%);
+  color: white;
+}
+
+.iconHeader {
+  width: 18px;
+  height: 18px;
+}

@@ -1,32 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { activeWorkoutStore } from '../../shared/stores/activeWorkoutStore';
+import { expandExerciseRowsToEntries } from '../activeWorkout/activeWorkoutSync';
 import api from '../api/api';
-
-async function getActiveWorkoutId() {
-  const today = new Date().toISOString().split('T')[0];
-  const workouts = await api.getWorkouts({ from: today, to: today });
-  const activeWorkout = workouts.find((workout) => !workout.timeEnd);
-
-  return activeWorkout?.id ?? null;
-}
+import { useExerciseOptions } from './useExerciseOptions';
 
 async function savePastWorkout({ exercises, notes }) {
   await api.beginWorkout();
 
-  const workoutId = await getActiveWorkoutId();
-  if (!workoutId) {
+  const activeWorkout = await api.getActiveWorkout();
+  if (!activeWorkout?.id) {
     throw new Error('Active workout not found');
   }
 
-  for (const exercise of exercises) {
-    for (let setIndex = 0; setIndex < exercise.sets; setIndex += 1) {
-      await api.addExerciseEntry(workoutId, {
-        exerciseId: exercise.exerciseId,
-        weight: exercise.weight,
-        repetitions: exercise.reps,
-      });
-    }
+  const entries = expandExerciseRowsToEntries(exercises);
+
+  for (const entry of entries) {
+    await api.addExerciseEntry(activeWorkout.id, entry);
   }
 
   await api.finishWorkout(notes);
@@ -42,59 +33,23 @@ function getWorkoutErrorMessage(err, { fallback, conflict }) {
 
 export function useWorkoutEntry() {
   const navigate = useNavigate();
-  const [exerciseOptions, setExerciseOptions] = useState([]);
-  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
-  const [isStarting, setIsStarting] = useState(false);
+  const { exerciseOptions, isLoadingExercises, error: exercisesError } = useExerciseOptions();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    const loadExercises = async () => {
-      setIsLoadingExercises(true);
-      setError('');
-
-      try {
-        const data = await api.getExercises();
-
-        if (!isCancelled) {
-          setExerciseOptions(data);
-        }
-      } catch {
-        if (!isCancelled) {
-          setError('Не удалось загрузить список упражнений');
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingExercises(false);
-        }
-      }
-    };
-
-    loadExercises();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
-
   const beginWorkout = async () => {
     setError('');
-    setIsStarting(true);
+
+    if (activeWorkoutStore.isActive) {
+      navigate(ROUTES.ACTIVE_WORKOUT);
+      return;
+    }
 
     try {
-      await api.beginWorkout();
-      navigate(ROUTES.WORKOUTS, {
-        state: { toast: '🏋️ Тренировка начата!' },
-      });
-    } catch (err) {
-      setError(getWorkoutErrorMessage(err, {
-        fallback: 'Не удалось начать тренировку',
-        conflict: 'У вас уже есть активная тренировка',
-      }));
-    } finally {
-      setIsStarting(false);
+      await activeWorkoutStore.startWorkout();
+      navigate(ROUTES.ACTIVE_WORKOUT);
+    } catch {
+      setError(activeWorkoutStore.syncError || 'Не удалось начать тренировку');
     }
   };
 
@@ -103,13 +58,6 @@ export function useWorkoutEntry() {
 
     if (!validExercises.length) {
       setError('Выберите хотя бы одно упражнение');
-      return;
-    }
-
-    const invalidWeight = validExercises.some((exercise) => Number(exercise.weight) <= 0);
-
-    if (invalidWeight) {
-      setError('Укажите вес больше 0 для каждого упражнения');
       return;
     }
 
@@ -140,12 +88,13 @@ export function useWorkoutEntry() {
     }
   };
 
+  const combinedError = error || exercisesError;
+
   return {
     exerciseOptions,
     isLoadingExercises,
-    isStarting,
     isSaving,
-    error,
+    error: combinedError,
     beginWorkout,
     saveWorkout,
   };

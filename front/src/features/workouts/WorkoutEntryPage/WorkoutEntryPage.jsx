@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSelect';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { useWorkoutEntry } from '../useWorkoutEntry';
 import styles from './WorkoutEntryPage.module.css';
@@ -23,7 +24,6 @@ function WorkoutEntryPage() {
   const {
     exerciseOptions,
     isLoadingExercises,
-    isStarting,
     isSaving,
     error,
     beginWorkout,
@@ -69,13 +69,8 @@ function WorkoutEntryPage() {
               Ничего заранее указывать не нужно — начните тренировку, а упражнения, подходы
               и время будете фиксировать прямо в процессе.
             </div>
-            <button
-              type="button"
-              className={styles.btnStartNow}
-              onClick={beginWorkout}
-              disabled={isStarting}
-            >
-              {isStarting ? 'Запуск...' : 'Начать тренировку сейчас'}
+            <button type="button" className={styles.btnStartNow} onClick={beginWorkout}>
+              Начать тренировку сейчас
             </button>
           </div>
         </div>
@@ -157,21 +152,18 @@ function WorkoutEntryPage() {
               </div>
               <div className={styles.exerciseGrid}>
                 <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
-                  <label className={styles.formLabel}>Упражнение</label>
-                  <select
-                    className={styles.formInput}
+                  <label className={styles.formLabel} htmlFor={`exercise-${exercise.id}`}>
+                    Упражнение
+                  </label>
+                  <ExerciseSelect
+                    id={`exercise-${exercise.id}`}
+                    exercises={exerciseOptions}
                     value={exercise.exerciseId}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'exerciseId', event.target.value)
+                    onChange={(nextExerciseId) =>
+                      updateExercise(exercise.id, 'exerciseId', nextExerciseId)
                     }
-                  >
-                    <option value="">Выберите упражнение</option>
-                    {exerciseOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
+                    loading={isLoadingExercises}
+                  />
                 </div>
                 <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
                   <label className={styles.formLabel}>Подходы</label>
@@ -206,7 +198,8 @@ function WorkoutEntryPage() {
                     onChange={(event) =>
                       updateExercise(exercise.id, 'weight', Number(event.target.value))
                     }
-                    min={1}
+                    min={0}
+                    step={0.5}
                   />
                 </div>
               </div>

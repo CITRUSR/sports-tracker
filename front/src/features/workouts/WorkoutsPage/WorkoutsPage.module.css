@@ -76,6 +76,8 @@
   gap: 16px;
   transition: box-shadow 0.2s;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .workoutCard:hover {

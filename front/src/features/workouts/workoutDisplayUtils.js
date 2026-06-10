@@ -18,6 +18,47 @@ export function getWorkoutExerciseNames(workout) {
   return names.join(', ') || 'Без упражнений';
 }
 
+export function formatWorkoutTime(timeStr) {
+  if (!timeStr) {
+    return '—';
+  }
+
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
+export function groupWorkoutExercises(exercises = []) {
+  const groups = new Map();
+
+  exercises.forEach((exercise) => {
+    const key = `${exercise.id}|${exercise.weight}|${exercise.repetitions}`;
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        name: exercise.name,
+        sets: 0,
+        reps: exercise.repetitions ?? 0,
+        weight: exercise.weight ?? 0,
+      });
+    }
+
+    groups.get(key).sets += 1;
+  });
+
+  return Array.from(groups.values());
+}
+
+export function getWorkoutTotalSets(exercises = []) {
+  return exercises.length;
+}
+
+export function getWorkoutTotalVolume(exercises = []) {
+  return exercises.reduce(
+    (total, exercise) => total + (exercise.repetitions ?? 0) * (exercise.weight ?? 0),
+    0,
+  );
+}
+
 export function getWorkoutDurationLabel(workout) {
   if (!workout.timeEnd) {
     return 'В процессе';

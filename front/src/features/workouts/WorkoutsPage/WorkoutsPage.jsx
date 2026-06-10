@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../../../constants/routes';
+import { getWorkoutDetailPath, ROUTES } from '../../../constants/routes';
+import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSelect';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import {
   formatWorkoutDate,
@@ -64,19 +65,15 @@ function WorkoutsPage() {
           <label className={styles.filterLabel} htmlFor="exercise-filter">
             Упражнение
           </label>
-          <select
+          <ExerciseSelect
             id="exercise-filter"
-            className={styles.filterInput}
+            exercises={exercises}
             value={exerciseId}
-            onChange={(event) => setExerciseId(event.target.value)}
-          >
-            <option value="">Все упражнения</option>
-            {exercises.map((exercise) => (
-              <option key={exercise.id} value={exercise.id}>
-                {exercise.name}
-              </option>
-            ))}
-          </select>
+            onChange={setExerciseId}
+            allowEmpty
+            emptyLabel="Все упражнения"
+            inputClassName={styles.filterInput}
+          />
         </div>
       </div>
 
@@ -101,7 +98,11 @@ function WorkoutsPage() {
           )}
 
           {completedWorkouts.map((workout) => (
-            <div className={styles.workoutCard} key={workout.id}>
+            <Link
+              to={getWorkoutDetailPath(workout.id)}
+              className={styles.workoutCard}
+              key={workout.id}
+            >
               <div className={styles.workoutInfo}>
                 <div className={styles.workoutDate}>{formatWorkoutDate(workout.date)}</div>
                 <div className={styles.workoutName}>{getWorkoutExerciseNames(workout)}</div>
@@ -112,7 +113,7 @@ function WorkoutsPage() {
               <div className={styles.workoutMeta}>
                 <div className={styles.workoutBadge}>{getWorkoutDurationLabel(workout)}</div>
               </div>
-            </div>
+            </Link>
           ))}
         </>
       )}

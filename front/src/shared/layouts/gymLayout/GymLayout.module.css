@@ -21,6 +21,11 @@
   box-sizing: border-box;
 }
 
+.workoutStrip {
+  background: linear-gradient(135deg, #3b5bf5 0%, #9b59f5 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .header {
   background: white;
   border-bottom: 1px solid #e4e7f0;
@@ -32,7 +37,37 @@
 .headerInner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   min-height: 64px;
+}
+
+.profileBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f2f8;
+  border: 2px solid #e4e7f0;
+  border-radius: 100px;
+  padding: 6px 14px 6px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Manrope', sans-serif;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.profileBtn:hover,
+.profileBtnActive {
+  border-color: #3b5bf5;
+  background: #eef1ff;
+}
+
+.profileBtnLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1d2e;
 }
 
 .logo {
@@ -122,13 +157,39 @@
   margin-left: auto;
   background: #1a1d2e;
   color: white;
-  padding: 14px 20px;
+  padding: 12px 12px 12px 20px;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 700;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   z-index: 999;
   animation: slideUp 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toastMessage {
+  flex: 1;
+  min-width: 0;
+}
+
+.toastClose {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.toastClose:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 @keyframes slideUp {
@@ -151,5 +212,13 @@
 
   .headerInner {
     min-height: 56px;
+  }
+
+  .logoSub {
+    display: none;
+  }
+
+  .profileBtnLabel {
+    display: none;
   }
 }

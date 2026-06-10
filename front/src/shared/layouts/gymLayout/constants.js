@@ -1,5 +1,7 @@
+import { ROUTES } from '../../../constants/routes';
+
 export const NAV_TABS = [
-  { path: '/', icon: '🏠', label: 'Главная' },
-  { path: '/workouts', icon: '📋', label: 'Тренировки' },
-  { path: '/progress', icon: '📈', label: 'Прогресс' },
+  { path: ROUTES.HOME, icon: '🏠', label: 'Главная' },
+  { path: ROUTES.WORKOUTS, icon: '📋', label: 'Тренировки' },
+  { path: ROUTES.PROGRESS, icon: '📈', label: 'Прогресс' },
 ];

@@ -77,8 +77,8 @@ public class WorkoutExerciseService : IWorkoutExerciseService
         if (dto.Repetitions is null or 0)
             return Result.Failure("Repetitions required");
 
-        if (dto.Weight is null or 0)
-            return Result.Failure("Weight required");
+        if (dto.Weight is < 0)
+            return Result.Failure("Weight cannot be negative");
 
         return Result.Success();
     }

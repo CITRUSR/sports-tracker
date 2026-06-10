@@ -1,0 +1,127 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  background: #f0f2f8;
+  border: 1.5px solid #e4e7f0;
+  border-radius: 10px;
+  padding: 12px 40px 12px 14px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  color: #1a1d2e;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #8b91a8;
+}
+
+.input:focus {
+  border-color: #3b5bf5;
+  background: white;
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #ef4444;
+}
+
+.inputError:focus {
+  border-color: #ef4444;
+}
+
+.toggle {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #8b91a8;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s;
+}
+
+.toggle:hover:not(:disabled) {
+  color: #3b5bf5;
+  background: #eef1ff;
+}
+
+.toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: white;
+  border: 1.5px solid #e4e7f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.option {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  color: #1a1d2e;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.option:hover,
+.optionHighlighted {
+  background: #eef1ff;
+}
+
+.optionSelected {
+  color: #3b5bf5;
+  font-weight: 700;
+}
+
+.empty {
+  padding: 14px 12px;
+  font-size: 13px;
+  color: #8b91a8;
+  text-align: center;
+}
