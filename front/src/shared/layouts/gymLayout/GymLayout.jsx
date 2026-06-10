@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import ProfileAvatar from '../../../features/profile/ProfileAvatar/ProfileAvatar';
+import { useProfile } from '../../../features/profile/useProfile';
 import { NAV_TABS } from './constants';
 import styles from './GymLayout.module.css';
 
@@ -8,9 +10,12 @@ function GymLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
+  const { profile } = useProfile();
   const isNewWorkout = location.pathname === ROUTES.NEW_WORKOUT;
   const isProfileEdit = location.pathname === ROUTES.PROFILE_EDIT;
-  const hideNav = isNewWorkout || isProfileEdit;
+  const isProfile = location.pathname === ROUTES.PROFILE;
+  const hideNav = isNewWorkout || isProfileEdit || isProfile;
+  const profileLabel = profile?.name?.split(' ')[0] ?? 'Профиль';
 
   useEffect(() => {
     if (location.state?.toast) {
@@ -33,6 +38,17 @@ function GymLayout() {
               <div className={styles.logoSub}>Учет результатов</div>
             </div>
           </Link>
+
+          <NavLink
+            to={ROUTES.PROFILE}
+            className={({ isActive }) =>
+              `${styles.profileBtn} ${isActive ? styles.profileBtnActive : ''}`
+            }
+            title={profile?.name ?? 'Профиль'}
+          >
+            <ProfileAvatar variant="header" />
+            <span className={styles.profileBtnLabel}>{profileLabel}</span>
+          </NavLink>
         </div>
       </header>
 

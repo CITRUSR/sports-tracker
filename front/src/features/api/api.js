@@ -117,6 +117,7 @@ export default {
   login: async (model) => {
     const token = await BaseApi.post('auth/login', model);
     applyAuthToken(token);
+    authStore.setLogin(model.login);
     return token;
   },
   register: (model) => BaseApi.post('auth/register', model),
@@ -125,7 +126,14 @@ export default {
     applyAuthToken(token);
     return token;
   },
-  clearAuth: () => applyAuthToken(null),
+  clearAuth: () => {
+    applyAuthToken(null);
+    authStore.clearLogin();
+  },
+
+  getProfile: () => BaseApi.get('profiles'),
+  createProfile: (model) => BaseApi.post('profiles', model),
+  updateProfile: (model) => BaseApi.put('profiles', model),
 
   getStatistics: () => BaseApi.get('statistics'),
   getExercises: () => BaseApi.get('exercises'),
