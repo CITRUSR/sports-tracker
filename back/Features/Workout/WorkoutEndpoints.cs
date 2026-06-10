@@ -48,6 +48,23 @@ public class WorkoutEndpoints : IEndpointMarker
         .Produces(StatusCodes.Status200OK, typeof(ActiveWorkoutDto))
         .Produces(StatusCodes.Status404NotFound);
 
+        app.MapGet($"{_baseRoute}/{{workoutId:guid}}", async (Guid workoutId,
+            [FromServices] IWorkoutService workoutService, HttpContext context, CancellationToken cancellationToken) =>
+        {
+            var userId = context.User.GetId();
+
+            var workout = await workoutService.GetByIdAsync(userId, workoutId, cancellationToken);
+            if (workout == null)
+                return Results.NotFound();
+
+            return Results.Ok(workout);
+        })
+        .RequireAuthorization()
+        .WithTags(_tag)
+        .WithDescription("Get workout by id")
+        .Produces(StatusCodes.Status200OK, typeof(WorkoutDto))
+        .Produces(StatusCodes.Status404NotFound);
+
         app.MapPost(_baseRoute, async ([FromServices] IWorkoutService workoutService, HttpContext context) =>
         {
             var userId = context.User.GetId();

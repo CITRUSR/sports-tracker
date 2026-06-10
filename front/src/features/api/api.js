@@ -146,6 +146,17 @@ export default {
 
     return BaseApi.get(`workouts?${params.toString()}`);
   },
+  getWorkout: async (workoutId) => {
+    try {
+      return await BaseApi.get(`workouts/${workoutId}`);
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+
+      throw error;
+    }
+  },
   getActiveWorkout: async () => {
     try {
       return await BaseApi.get('workouts/active');

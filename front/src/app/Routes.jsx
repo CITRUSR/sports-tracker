@@ -4,6 +4,7 @@ import WorkoutEntryPage from '../features/workouts/WorkoutEntryPage/WorkoutEntry
 import EditProfilePage from '../features/profile/EditProfilePage/EditProfilePage';
 import ProfilePage from '../features/profile/ProfilePage/ProfilePage';
 import ProgressPage from '../features/progress/ProgressPage/ProgressPage';
+import WorkoutDetailPage from '../features/workouts/WorkoutDetailPage/WorkoutDetailPage';
 import WorkoutsPage from '../features/workouts/WorkoutsPage/WorkoutsPage';
 import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
@@ -41,6 +42,11 @@ export const routes = [
         path: ROUTES.WORKOUTS,
         access: ROUTE_ACCESS.PRIVATE,
         element: <WorkoutsPage />,
+      },
+      {
+        path: ROUTES.WORKOUT_DETAIL,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <WorkoutDetailPage />,
       },
       {
         path: ROUTES.PROGRESS,

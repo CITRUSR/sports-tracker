@@ -129,6 +129,37 @@ public class WorkoutService : IWorkoutService
         return workouts;
     }
 
+    public async Task<WorkoutDto?> GetByIdAsync(string userId, Guid workoutId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Workouts.AsNoTracking()
+            .Where(x => x.Id == workoutId && x.UserId == userId)
+            .Select(x => new WorkoutDto
+            {
+                Id = x.Id,
+                Comment = x.Comment,
+                Date = x.Date,
+                TimeEnd = x.TimeEnd,
+                TimeStart = x.TimeStart,
+                Exercises = x.ExerciseEntries.Select(entry => new ExerciseDto
+                {
+                    Id = entry.ExerciseId,
+                    Distance = entry.Distance,
+                    Repetitions = entry.Repetitions,
+                    Weight = entry.Weight,
+                    Name = entry.Exercise.Name,
+                    Type = entry.Exercise.Type,
+                    Duration = entry.Duration,
+                }).ToList(),
+                Pauses = x.Pauses.Select(p => new PauseDto
+                {
+                    StartTime = p.StartTime,
+                    EndTime = p.EndTime,
+                }).ToList(),
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<Result> PauseAsync(string userId, CancellationToken cancellationToken = default)
     {
         var activeWorkout = await GetActiveWorkoutAsync(userId, true, cancellationToken);
