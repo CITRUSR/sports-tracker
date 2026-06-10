@@ -1,0 +1,103 @@
+.empty {
+  text-align: center;
+  padding: 32px 0;
+  color: #8b91a8;
+}
+
+.emptyIcon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  opacity: 0.3;
+}
+
+.emptyText {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b91a8;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.weekBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+  margin-bottom: 6px;
+}
+
+.weekBarGroup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.weekBar {
+  width: 100%;
+  border-radius: 6px;
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.weekBarActive {
+  background: linear-gradient(135deg, #3b5bf5 0%, #9b59f5 100%);
+}
+
+.weekBarInactive {
+  background: #e4e7f0;
+  height: 4px;
+  opacity: 0.5;
+}
+
+.topSectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b91a8;
+  margin: 20px 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.topRow {
+  margin-bottom: 10px;
+}
+
+.topRowHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.topName {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.topVolume {
+  font-size: 12px;
+  color: #8b91a8;
+  font-weight: 600;
+}
+
+.topTrack {
+  height: 6px;
+  border-radius: 100px;
+  background: #e4e7f0;
+  overflow: hidden;
+}
+
+.topFill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #3b5bf5, #9b59f5);
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

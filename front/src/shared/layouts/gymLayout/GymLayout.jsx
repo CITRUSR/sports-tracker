@@ -9,6 +9,8 @@ function GymLayout() {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
   const isNewWorkout = location.pathname === ROUTES.NEW_WORKOUT;
+  const isProfileEdit = location.pathname === ROUTES.PROFILE_EDIT;
+  const hideNav = isNewWorkout || isProfileEdit;
 
   useEffect(() => {
     if (location.state?.toast) {
@@ -34,7 +36,7 @@ function GymLayout() {
         </div>
       </header>
 
-      {!isNewWorkout && (
+      {!hideNav && (
         <nav className={styles.nav}>
           <div className={`${styles.shell} ${styles.navInner}`}>
             {NAV_TABS.map((tab) => (

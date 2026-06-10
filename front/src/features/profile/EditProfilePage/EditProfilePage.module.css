@@ -1,0 +1,200 @@
+.page {
+  max-width: 760px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: #8b91a8;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+
+.backBtn:hover {
+  color: #3b5bf5;
+}
+
+.formCard {
+  background: white;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formRowThree {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b91a8;
+}
+
+.formInput {
+  background: #f0f2f8;
+  border: 1.5px solid #e4e7f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  color: #1a1d2e;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus {
+  border-color: #3b5bf5;
+  background: white;
+}
+
+.formTextarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.avatarPicker {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.avatarOpt {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f0f2f8;
+  border: 2px solid #e4e7f0;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.avatarOptSelected {
+  border-color: #3b5bf5;
+  background: #eef1ff;
+}
+
+.avatarOpt:hover:not(.avatarOptSelected) {
+  border-color: #8b91a8;
+}
+
+.goalsWrap {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exChip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid #e4e7f0;
+  background: white;
+  font-family: 'Manrope', sans-serif;
+  transition: all 0.2s;
+  color: #8b91a8;
+}
+
+.exChipActive {
+  background: #3b5bf5;
+  border-color: #3b5bf5;
+  color: white;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 32px;
+}
+
+.btnPrimary {
+  flex: 1;
+  justify-content: center;
+  padding: 14px;
+  background: #3b5bf5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(59, 91, 245, 0.3);
+}
+
+.btnPrimary:hover {
+  background: #2a4ae0;
+}
+
+.btnOutline {
+  padding: 14px 24px;
+  background: transparent;
+  color: #3b5bf5;
+  border: 2px solid #3b5bf5;
+  border-radius: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnOutline:hover {
+  background: #eef1ff;
+}
+
+@media (max-width: 768px) {
+  .formCard {
+    padding: 18px;
+  }
+
+  .formRow,
+  .formRowThree {
+    grid-template-columns: 1fr;
+  }
+}
