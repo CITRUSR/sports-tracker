@@ -1,4 +1,4 @@
-const useLocalEndpoints = true;
+const useLocalEndpoints = false;
 
 export const urls = {
   ...(useLocalEndpoints
