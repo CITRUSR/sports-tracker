@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import NumberInput from '../../../shared/components/numberInput/NumberInput';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { useProfile } from '../useProfile';
 import styles from './EditProfilePage.module.css';
@@ -15,7 +16,7 @@ function EditProfilePage() {
     if (!isLoading) {
       setForm({
         name: profile?.name ?? '',
-        age: profile?.age ?? 25,
+        age: profile?.age ?? 0,
         weight: profile?.weight ?? 70,
       });
     }
@@ -35,7 +36,7 @@ function EditProfilePage() {
       return;
     }
 
-    if (needsCreate && (form.age < 12 || form.age > 120)) {
+    if (needsCreate && (!form.age || form.age < 12 || form.age > 120)) {
       setValidationError('Возраст должен быть от 12 до 120 лет');
       return;
     }
@@ -102,14 +103,17 @@ function EditProfilePage() {
               <label className={styles.formLabel} htmlFor="profile-age">
                 Возраст
               </label>
-              <input
+              <NumberInput
                 id="profile-age"
-                type="number"
                 className={styles.formInput}
                 value={form.age}
-                onChange={(event) => setField('age', Number(event.target.value))}
+                onChange={(nextValue) => {
+                  setValidationError('');
+                  setField('age', nextValue);
+                }}
                 min={12}
                 max={120}
+                placeholder="Ваш возраст"
               />
             </div>
           )}

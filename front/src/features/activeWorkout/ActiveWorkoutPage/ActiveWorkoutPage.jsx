@@ -130,6 +130,11 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
       return;
     }
 
+    if (exercises.length === 0) {
+      setPageError('Добавьте хотя бы одно упражнение перед завершением тренировки');
+      return;
+    }
+
     setPageError('');
 
     try {

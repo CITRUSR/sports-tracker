@@ -56,13 +56,16 @@ function GymTracker() {
         </div>
         <div className={styles.actionCard}>
           <div className={`${styles.actionIcon} ${styles.actionIconPurple}`}>📊</div>
-          <div className={styles.actionTitle}>Прогресс</div>
+          <div className={styles.actionTitle}>
+            Прогресс
+            <span className={styles.soonBadge}>Скоро</span>
+          </div>
           <div className={styles.actionDesc}>
             Просматривайте детальную статистику по каждому упражнению
           </div>
-          <Link to={ROUTES.PROGRESS} className={`${styles.btnOutline} ${styles.btnOutlineFull}`}>
-            Посмотреть прогресс
-          </Link>
+          <span className={`${styles.btnOutline} ${styles.btnOutlineFull} ${styles.btnSoon}`}>
+            Скоро
+          </span>
         </div>
       </div>
 

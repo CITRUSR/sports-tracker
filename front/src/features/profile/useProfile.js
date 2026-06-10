@@ -64,7 +64,7 @@ export function useProfile() {
       await loadProfile();
       return true;
     } catch (err) {
-      setError(getApiErrorпMessage(err, 'Не удалось сохранить профиль'));
+      setError(getApiErrorMessage(err, 'Не удалось сохранить профиль'));
       return false;
     } finally {
       setIsSaving(false);

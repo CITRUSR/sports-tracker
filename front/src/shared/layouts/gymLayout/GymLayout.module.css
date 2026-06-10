@@ -143,6 +143,25 @@
   border-bottom-color: #3b5bf5;
 }
 
+.navTabSoon {
+  color: #b0b5c8;
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
+}
+
+.soonBadge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #f0f2f8;
+  color: #8b91a8;
+  border-radius: 6px;
+  padding: 2px 6px;
+  line-height: 1.4;
+}
+
 .content {
   padding-top: var(--gym-content-padding-y);
   padding-bottom: 48px;

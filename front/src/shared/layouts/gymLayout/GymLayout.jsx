@@ -86,18 +86,29 @@ const GymLayout = observer(function GymLayout() {
       {!hideNav && (
         <nav className={styles.nav}>
           <div className={`${styles.shell} ${styles.navInner}`}>
-            {NAV_TABS.map((tab) => (
-              <NavLink
-                key={tab.path}
-                to={tab.path}
-                end={tab.path === ROUTES.HOME}
-                className={({ isActive }) =>
-                  `${styles.navTab} ${isActive ? styles.navTabActive : ''}`
-                }
-              >
-                {tab.icon} {tab.label}
-              </NavLink>
-            ))}
+            {NAV_TABS.map((tab) =>
+              tab.comingSoon ? (
+                <span
+                  key={tab.path}
+                  className={`${styles.navTab} ${styles.navTabSoon}`}
+                  aria-disabled="true"
+                >
+                  {tab.icon} {tab.label}
+                  <span className={styles.soonBadge}>Скоро</span>
+                </span>
+              ) : (
+                <NavLink
+                  key={tab.path}
+                  to={tab.path}
+                  end={tab.path === ROUTES.HOME}
+                  className={({ isActive }) =>
+                    `${styles.navTab} ${isActive ? styles.navTabActive : ''}`
+                  }
+                >
+                  {tab.icon} {tab.label}
+                </NavLink>
+              ),
+            )}
           </div>
         </nav>
       )}
