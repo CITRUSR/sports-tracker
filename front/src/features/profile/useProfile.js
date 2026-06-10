@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import api from '../api/api';
+import { getApiErrorMessage } from '../api/getApiErrorMessage';
 import { ageToDateOfBirth, mapProfileFromApi } from './profileUtils';
 
 export function useProfile() {
@@ -63,14 +64,7 @@ export function useProfile() {
       await loadProfile();
       return true;
     } catch (err) {
-      const message = err.response?.data?.message ?? err.response?.data;
-      setError(
-        typeof message === 'string'
-          ? message
-          : Array.isArray(message)
-            ? message.join(', ')
-            : 'Не удалось сохранить профиль',
-      );
+      setError(getApiErrorMessage(err, 'Не удалось сохранить профиль'));
       return false;
     } finally {
       setIsSaving(false);
