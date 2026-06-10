@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
 import { activeWorkoutStore } from '../../shared/stores/activeWorkoutStore';
 import api from '../api/api';
+import { useExerciseOptions } from './useExerciseOptions';
 
 async function getActiveWorkoutId() {
   const today = new Date().toISOString().split('T')[0];
@@ -43,41 +44,9 @@ function getWorkoutErrorMessage(err, { fallback, conflict }) {
 
 export function useWorkoutEntry() {
   const navigate = useNavigate();
-  const [exerciseOptions, setExerciseOptions] = useState([]);
-  const [isLoadingExercises, setIsLoadingExercises] = useState(true);
+  const { exerciseOptions, isLoadingExercises, error: exercisesError } = useExerciseOptions();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    const loadExercises = async () => {
-      setIsLoadingExercises(true);
-      setError('');
-
-      try {
-        const data = await api.getExercises();
-
-        if (!isCancelled) {
-          setExerciseOptions(data);
-        }
-      } catch {
-        if (!isCancelled) {
-          setError('Не удалось загрузить список упражнений');
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoadingExercises(false);
-        }
-      }
-    };
-
-    loadExercises();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
 
   const beginWorkout = () => {
     setError('');
@@ -133,11 +102,13 @@ export function useWorkoutEntry() {
     }
   };
 
+  const combinedError = error || exercisesError;
+
   return {
     exerciseOptions,
     isLoadingExercises,
     isSaving,
-    error,
+    error: combinedError,
     beginWorkout,
     saveWorkout,
   };

@@ -1,39 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import api from '../api/api';
+import { useExerciseOptions } from './useExerciseOptions';
 import { getDefaultDateFrom, getDefaultDateTo } from './workoutUtils';
 
 export function useWorkoutsPage() {
   const [dateFrom, setDateFrom] = useState(getDefaultDateFrom);
   const [dateTo, setDateTo] = useState(getDefaultDateTo);
   const [exerciseId, setExerciseId] = useState('');
-  const [exercises, setExercises] = useState([]);
+  const { exerciseOptions: exercises, error: exercisesError } = useExerciseOptions();
   const [workouts, setWorkouts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    const loadExercises = async () => {
-      try {
-        const data = await api.getExercises();
-
-        if (!isCancelled) {
-          setExercises(data);
-        }
-      } catch {
-        if (!isCancelled) {
-          setError('Не удалось загрузить список упражнений');
-        }
-      }
-    };
-
-    loadExercises();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     let isCancelled = false;
@@ -93,6 +70,6 @@ export function useWorkoutsPage() {
     completedWorkouts,
     hasActiveWorkout,
     isLoading,
-    error,
+    error: error || exercisesError,
   };
 }

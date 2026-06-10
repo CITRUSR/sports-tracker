@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSelect';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { activeWorkoutStore } from '../../../shared/stores/activeWorkoutStore';
 import formStyles from '../../workouts/WorkoutEntryPage/WorkoutEntryPage.module.css';
@@ -180,20 +181,16 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
                 {renderField(
                   'Упражнение',
                   exerciseErrors.exerciseId,
-                  <select
-                    className={`${formStyles.formInput} ${exerciseErrors.exerciseId ? styles.formInputError : ''}`}
+                  <ExerciseSelect
+                    id={`active-exercise-${exercise.id}`}
+                    exercises={exerciseOptions}
                     value={exercise.exerciseId}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'exerciseId', event.target.value)
+                    onChange={(nextExerciseId) =>
+                      updateExercise(exercise.id, 'exerciseId', nextExerciseId)
                     }
-                  >
-                    <option value="">Выберите упражнение</option>
-                    {exerciseOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>,
+                    loading={isLoadingExercises}
+                    error={Boolean(exerciseErrors.exerciseId)}
+                  />,
                 )}
                 {renderField(
                   'Подходы',
