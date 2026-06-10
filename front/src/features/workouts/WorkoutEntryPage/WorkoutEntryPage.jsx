@@ -23,7 +23,6 @@ function WorkoutEntryPage() {
   const {
     exerciseOptions,
     isLoadingExercises,
-    isStarting,
     isSaving,
     error,
     beginWorkout,
@@ -69,13 +68,8 @@ function WorkoutEntryPage() {
               Ничего заранее указывать не нужно — начните тренировку, а упражнения, подходы
               и время будете фиксировать прямо в процессе.
             </div>
-            <button
-              type="button"
-              className={styles.btnStartNow}
-              onClick={beginWorkout}
-              disabled={isStarting}
-            >
-              {isStarting ? 'Запуск...' : 'Начать тренировку сейчас'}
+            <button type="button" className={styles.btnStartNow} onClick={beginWorkout}>
+              Начать тренировку сейчас
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../constants/routes';
+import { activeWorkoutStore } from '../../shared/stores/activeWorkoutStore';
 import api from '../api/api';
 
 async function getActiveWorkoutId() {
@@ -44,7 +45,6 @@ export function useWorkoutEntry() {
   const navigate = useNavigate();
   const [exerciseOptions, setExerciseOptions] = useState([]);
   const [isLoadingExercises, setIsLoadingExercises] = useState(true);
-  const [isStarting, setIsStarting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -79,23 +79,16 @@ export function useWorkoutEntry() {
     };
   }, []);
 
-  const beginWorkout = async () => {
+  const beginWorkout = () => {
     setError('');
-    setIsStarting(true);
 
-    try {
-      await api.beginWorkout();
-      navigate(ROUTES.WORKOUTS, {
-        state: { toast: '🏋️ Тренировка начата!' },
-      });
-    } catch (err) {
-      setError(getWorkoutErrorMessage(err, {
-        fallback: 'Не удалось начать тренировку',
-        conflict: 'У вас уже есть активная тренировка',
-      }));
-    } finally {
-      setIsStarting(false);
+    if (activeWorkoutStore.isActive) {
+      navigate(ROUTES.ACTIVE_WORKOUT);
+      return;
     }
+
+    activeWorkoutStore.startWorkout();
+    navigate(ROUTES.ACTIVE_WORKOUT);
   };
 
   const saveWorkout = async (formExercises, notes) => {
@@ -143,7 +136,6 @@ export function useWorkoutEntry() {
   return {
     exerciseOptions,
     isLoadingExercises,
-    isStarting,
     isSaving,
     error,
     beginWorkout,

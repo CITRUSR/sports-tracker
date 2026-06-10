@@ -1,21 +1,26 @@
+import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
+import ActiveWorkoutBanner from '../../../features/activeWorkout/ActiveWorkoutBanner/ActiveWorkoutBanner';
 import ProfileAvatar from '../../../features/profile/ProfileAvatar/ProfileAvatar';
 import { useProfile } from '../../../features/profile/useProfile';
+import { activeWorkoutStore } from '../../stores/activeWorkoutStore';
 import { NAV_TABS } from './constants';
 import styles from './GymLayout.module.css';
 
-function GymLayout() {
+const GymLayout = observer(function GymLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
   const { profile } = useProfile();
   const isNewWorkout = location.pathname === ROUTES.NEW_WORKOUT;
+  const isActiveWorkout = location.pathname === ROUTES.ACTIVE_WORKOUT;
   const isProfileEdit = location.pathname === ROUTES.PROFILE_EDIT;
   const isProfile = location.pathname === ROUTES.PROFILE;
-  const hideNav = isNewWorkout || isProfileEdit || isProfile;
+  const hideNav = isNewWorkout || isActiveWorkout || isProfileEdit || isProfile;
   const profileLabel = profile?.name?.split(' ')[0] ?? 'Профиль';
+  const showWorkoutBanner = activeWorkoutStore.isActive && !isActiveWorkout;
 
   useEffect(() => {
     if (location.state?.toast) {
@@ -52,6 +57,14 @@ function GymLayout() {
         </div>
       </header>
 
+      {showWorkoutBanner && (
+        <div className={styles.workoutStrip}>
+          <div className={styles.shell}>
+            <ActiveWorkoutBanner />
+          </div>
+        </div>
+      )}
+
       {!hideNav && (
         <nav className={styles.nav}>
           <div className={`${styles.shell} ${styles.navInner}`}>
@@ -78,6 +91,6 @@ function GymLayout() {
       {toast && <div className={styles.toast}>{toast}</div>}
     </div>
   );
-}
+});
 
 export default GymLayout;

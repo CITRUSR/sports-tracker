@@ -1,3 +1,4 @@
+import ActiveWorkoutPage from '../features/activeWorkout/ActiveWorkoutPage/ActiveWorkoutPage';
 import GymTracker from '../features/gymTracker/GymTracker/GymTracker';
 import WorkoutEntryPage from '../features/workouts/WorkoutEntryPage/WorkoutEntryPage';
 import EditProfilePage from '../features/profile/EditProfilePage/EditProfilePage';
@@ -30,6 +31,11 @@ export const routes = [
         path: ROUTES.NEW_WORKOUT,
         access: ROUTE_ACCESS.PRIVATE,
         element: <WorkoutEntryPage />,
+      },
+      {
+        path: ROUTES.ACTIVE_WORKOUT,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <ActiveWorkoutPage />,
       },
       {
         path: ROUTES.WORKOUTS,
