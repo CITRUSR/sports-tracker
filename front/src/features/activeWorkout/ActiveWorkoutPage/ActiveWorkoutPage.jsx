@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSelect';
+import NumberInput from '../../../shared/components/numberInput/NumberInput';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { activeWorkoutStore } from '../../../shared/stores/activeWorkoutStore';
 import formStyles from '../../workouts/WorkoutEntryPage/WorkoutEntryPage.module.css';
@@ -207,11 +208,10 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           {renderField(
             'Подходы',
             exerciseErrors.sets,
-            <input
-              type="number"
+            <NumberInput
               className={`${formStyles.formInput} ${exerciseErrors.sets ? styles.formInputError : ''}`}
               value={exercise.sets}
-              onChange={(event) => onChange('sets', Number(event.target.value))}
+              onChange={(nextValue) => onChange('sets', nextValue)}
               min={1}
               disabled={isActionPending}
             />,
@@ -219,11 +219,10 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           {renderField(
             'Повторения',
             exerciseErrors.reps,
-            <input
-              type="number"
+            <NumberInput
               className={`${formStyles.formInput} ${exerciseErrors.reps ? styles.formInputError : ''}`}
               value={exercise.reps}
-              onChange={(event) => onChange('reps', Number(event.target.value))}
+              onChange={(nextValue) => onChange('reps', nextValue)}
               min={1}
               disabled={isActionPending}
             />,
@@ -231,11 +230,10 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
           {renderField(
             'Вес (кг)',
             exerciseErrors.weight,
-            <input
-              type="number"
+            <NumberInput
               className={`${formStyles.formInput} ${exerciseErrors.weight ? styles.formInputError : ''}`}
               value={exercise.weight}
-              onChange={(event) => onChange('weight', Number(event.target.value))}
+              onChange={(nextValue) => onChange('weight', nextValue)}
               min={0}
               step={0.5}
               disabled={isActionPending}

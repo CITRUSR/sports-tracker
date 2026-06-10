@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../../../constants/routes';
 import ExerciseSelect from '../../../shared/components/exerciseSelect/ExerciseSelect';
+import NumberInput from '../../../shared/components/numberInput/NumberInput';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { useWorkoutEntry } from '../useWorkoutEntry';
 import styles from './WorkoutEntryPage.module.css';
@@ -167,37 +168,28 @@ function WorkoutEntryPage() {
                 </div>
                 <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
                   <label className={styles.formLabel}>Подходы</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     className={styles.formInput}
                     value={exercise.sets}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'sets', Number(event.target.value))
-                    }
+                    onChange={(nextValue) => updateExercise(exercise.id, 'sets', nextValue)}
                     min={1}
                   />
                 </div>
                 <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
                   <label className={styles.formLabel}>Повторения</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     className={styles.formInput}
                     value={exercise.reps}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'reps', Number(event.target.value))
-                    }
+                    onChange={(nextValue) => updateExercise(exercise.id, 'reps', nextValue)}
                     min={1}
                   />
                 </div>
                 <div className={`${styles.formGroup} ${styles.formGroupInline}`}>
                   <label className={styles.formLabel}>Вес (кг)</label>
-                  <input
-                    type="number"
+                  <NumberInput
                     className={styles.formInput}
                     value={exercise.weight}
-                    onChange={(event) =>
-                      updateExercise(exercise.id, 'weight', Number(event.target.value))
-                    }
+                    onChange={(nextValue) => updateExercise(exercise.id, 'weight', nextValue)}
                     min={0}
                     step={0.5}
                   />
