@@ -21,11 +21,33 @@ class ActiveWorkoutStore {
   notes = '';
   exercises = [];
   draftExercise = null;
+  hasHydrated = false;
   _timerId = null;
+  _hydratePromise = null;
 
   constructor() {
     makeAutoObservable(this);
   }
+
+  ensureHydrated = async () => {
+    if (this.hasHydrated) {
+      return this.isActive;
+    }
+
+    if (this._hydratePromise) {
+      await this._hydratePromise;
+      return this.isActive;
+    }
+
+    this._hydratePromise = this.hydrateFromServer()
+      .then(() => this.isActive)
+      .finally(() => {
+        this.hasHydrated = true;
+        this._hydratePromise = null;
+      });
+
+    return this._hydratePromise;
+  };
 
   applyActiveWorkout = (activeWorkout) => {
     this.workoutId = activeWorkout.id;

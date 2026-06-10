@@ -28,7 +28,7 @@ const GymLayout = observer(function GymLayout() {
       return;
     }
 
-    activeWorkoutStore.hydrateFromServer();
+    activeWorkoutStore.ensureHydrated();
   }, [isAuthReady]);
 
   useEffect(() => {

@@ -39,21 +39,34 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
   } = activeWorkoutStore;
   const { exerciseOptions, isLoadingExercises } = useExerciseOptions();
   const todayLabel = formatWorkoutDateRu(getTodayDateString());
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    activeWorkoutStore.refreshFromServer();
-  }, []);
+    let isCancelled = false;
 
-  useEffect(() => {
-    if (!isHydrating && !isActive) {
-      navigate(ROUTES.NEW_WORKOUT, { replace: true });
-    }
-  }, [isActive, isHydrating, navigate]);
+    activeWorkoutStore.ensureHydrated().then((hasActiveWorkout) => {
+      if (isCancelled) {
+        return;
+      }
 
-  if (isHydrating || !isActive) {
-    return isHydrating ? (
-      <div className={pageStyles.pageStatus}>Загрузка тренировки...</div>
-    ) : null;
+      setIsReady(true);
+
+      if (!hasActiveWorkout) {
+        navigate(ROUTES.NEW_WORKOUT, { replace: true });
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [navigate]);
+
+  if (!isReady || isHydrating) {
+    return <div className={pageStyles.pageStatus}>Загрузка тренировки...</div>;
+  }
+
+  if (!isActive) {
+    return null;
   }
 
   const validateRow = (row) => {
