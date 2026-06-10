@@ -42,10 +42,6 @@
   gap: 16px;
 }
 
-.formRowThree {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -80,66 +76,6 @@
 .formInput:focus {
   border-color: #3b5bf5;
   background: white;
-}
-
-.formTextarea {
-  min-height: 100px;
-  resize: vertical;
-}
-
-.avatarPicker {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.avatarOpt {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  background: #f0f2f8;
-  border: 2px solid #e4e7f0;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-
-.avatarOptSelected {
-  border-color: #3b5bf5;
-  background: #eef1ff;
-}
-
-.avatarOpt:hover:not(.avatarOptSelected) {
-  border-color: #8b91a8;
-}
-
-.goalsWrap {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.exChip {
-  padding: 8px 16px;
-  border-radius: 100px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  border: 2px solid #e4e7f0;
-  background: white;
-  font-family: 'Manrope', sans-serif;
-  transition: all 0.2s;
-  color: #8b91a8;
-}
-
-.exChipActive {
-  background: #3b5bf5;
-  border-color: #3b5bf5;
-  color: white;
 }
 
 .formActions {
@@ -193,8 +129,7 @@
     padding: 18px;
   }
 
-  .formRow,
-  .formRowThree {
+  .formRow {
     grid-template-columns: 1fr;
   }
 }
