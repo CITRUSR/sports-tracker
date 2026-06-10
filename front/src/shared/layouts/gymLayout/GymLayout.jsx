@@ -32,14 +32,23 @@ const GymLayout = observer(function GymLayout() {
   }, [isAuthReady]);
 
   useEffect(() => {
-    if (location.state?.toast) {
-      setToast(location.state.toast);
-      const { toast: _toast, ...restState } = location.state;
-      navigate(location.pathname, { replace: true, state: restState });
-      const timer = setTimeout(() => setToast(null), 2500);
-      return () => clearTimeout(timer);
+    if (!location.state?.toast) {
+      return;
     }
-  }, [location, navigate]);
+
+    setToast(location.state.toast);
+    const { toast: _toast, ...restState } = location.state;
+    navigate(location.pathname, { replace: true, state: restState });
+  }, [location.key, location.pathname, location.state?.toast, navigate]);
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   return (
     <div className={styles.app}>
@@ -97,7 +106,19 @@ const GymLayout = observer(function GymLayout() {
         <Outlet />
       </main>
 
-      {toast && <div className={styles.toast}>{toast}</div>}
+      {toast && (
+        <div className={styles.toast} role="status">
+          <span className={styles.toastMessage}>{toast}</span>
+          <button
+            type="button"
+            className={styles.toastClose}
+            onClick={() => setToast(null)}
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   );
 });
