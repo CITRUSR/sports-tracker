@@ -14,11 +14,10 @@ const GymLayout = observer(function GymLayout() {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
   const { profile } = useProfile();
-  const isNewWorkout = location.pathname === ROUTES.NEW_WORKOUT;
   const isActiveWorkout = location.pathname === ROUTES.ACTIVE_WORKOUT;
   const isProfileEdit = location.pathname === ROUTES.PROFILE_EDIT;
   const isProfile = location.pathname === ROUTES.PROFILE;
-  const hideNav = isNewWorkout || isActiveWorkout || isProfileEdit || isProfile;
+  const hideNav = isActiveWorkout || isProfileEdit || isProfile;
   const profileLabel = profile?.name?.split(' ')[0] ?? 'Профиль';
   const showWorkoutBanner = activeWorkoutStore.isActive && !isActiveWorkout;
 

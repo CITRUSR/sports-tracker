@@ -64,7 +64,15 @@ class ActiveWorkoutStore {
     this.running = stored.running ?? false;
     this.date = getTodayDateString();
     this.notes = stored.notes ?? '';
-    this.exercises = stored.exercises?.length ? stored.exercises : [createExerciseRow()];
+    this.exercises = stored.exercises?.length
+      ? stored.exercises.map((exercise) => ({
+          id: exercise.id ?? Date.now(),
+          exerciseId: exercise.exerciseId ?? '',
+          sets: exercise.sets ?? 3,
+          reps: exercise.reps ?? 10,
+          weight: exercise.weight ?? 0,
+        }))
+      : [createExerciseRow()];
 
     if (this.running) {
       this.startTimer();

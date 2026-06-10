@@ -5,6 +5,7 @@ import { ROUTES } from '../../../constants/routes';
 import pageStyles from '../../../shared/layouts/gymLayout/gymPage.module.css';
 import { activeWorkoutStore } from '../../../shared/stores/activeWorkoutStore';
 import formStyles from '../../workouts/WorkoutEntryPage/WorkoutEntryPage.module.css';
+import { useWorkoutEntry } from '../../workouts/useWorkoutEntry';
 import { formatElapsed, formatWorkoutDateRu, getTodayDateString } from '../activeWorkoutUtils';
 import styles from './ActiveWorkoutPage.module.css';
 
@@ -25,6 +26,7 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
     finishWorkout,
     cancelWorkout,
   } = activeWorkoutStore;
+  const { exerciseOptions, isLoadingExercises } = useWorkoutEntry();
   const todayLabel = formatWorkoutDateRu(getTodayDateString());
 
   useEffect(() => {
@@ -44,8 +46,8 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
     exercises.forEach((exercise) => {
       const exerciseErrors = {};
 
-      if (!exercise.name.trim()) {
-        exerciseErrors.name = 'Введите название упражнения';
+      if (!exercise.exerciseId) {
+        exerciseErrors.exerciseId = 'Выберите упражнение';
         isValid = false;
       }
 
@@ -144,12 +146,16 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
             type="button"
             className={`${formStyles.btnPrimary} ${formStyles.btnPrimarySmall}`}
             onClick={addExercise}
+            disabled={isLoadingExercises}
           >
             + Добавить упражнение
           </button>
         </div>
 
-        {exercises.map((exercise, index) => {
+        {isLoadingExercises ? (
+          <div className={pageStyles.pageStatus}>Загрузка упражнений...</div>
+        ) : (
+          exercises.map((exercise, index) => {
           const exerciseErrors = errors[exercise.id] || {};
           const hasError = Object.keys(exerciseErrors).length > 0;
 
@@ -172,14 +178,22 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
               </div>
               <div className={styles.exerciseGrid}>
                 {renderField(
-                  'Название',
-                  exerciseErrors.name,
-                  <input
-                    className={`${formStyles.formInput} ${exerciseErrors.name ? styles.formInputError : ''}`}
-                    placeholder="Например, Жим штанги"
-                    value={exercise.name}
-                    onChange={(event) => updateExercise(exercise.id, 'name', event.target.value)}
-                  />,
+                  'Упражнение',
+                  exerciseErrors.exerciseId,
+                  <select
+                    className={`${formStyles.formInput} ${exerciseErrors.exerciseId ? styles.formInputError : ''}`}
+                    value={exercise.exerciseId}
+                    onChange={(event) =>
+                      updateExercise(exercise.id, 'exerciseId', event.target.value)
+                    }
+                  >
+                    <option value="">Выберите упражнение</option>
+                    {exerciseOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>,
                 )}
                 {renderField(
                   'Подходы',
@@ -224,7 +238,8 @@ const ActiveWorkoutPage = observer(function ActiveWorkoutPage() {
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       <div className={formStyles.formCard}>
