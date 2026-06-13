@@ -5,6 +5,7 @@ export const ROUTES = {
   NEW_WORKOUT: '/workouts/new',
   ACTIVE_WORKOUT: '/workouts/active',
   PROGRESS: '/progress',
+  EXERCISES: '/exercises',
   PROFILE: '/profile',
   PROFILE_EDIT: '/profile/edit',
   LOGIN: '/login',

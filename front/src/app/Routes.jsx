@@ -3,6 +3,7 @@ import GymTracker from '../features/gymTracker/GymTracker/GymTracker';
 import WorkoutEntryPage from '../features/workouts/WorkoutEntryPage/WorkoutEntryPage';
 import EditProfilePage from '../features/profile/EditProfilePage/EditProfilePage';
 import ProfilePage from '../features/profile/ProfilePage/ProfilePage';
+import ExercisesPage from '../features/exercises/ExercisesPage/ExercisesPage';
 import ProgressPage from '../features/progress/ProgressPage/ProgressPage';
 import WorkoutDetailPage from '../features/workouts/WorkoutDetailPage/WorkoutDetailPage';
 import WorkoutsPage from '../features/workouts/WorkoutsPage/WorkoutsPage';
@@ -52,6 +53,11 @@ export const routes = [
         path: ROUTES.PROGRESS,
         access: ROUTE_ACCESS.PRIVATE,
         element: <ProgressPage />,
+      },
+      {
+        path: ROUTES.EXERCISES,
+        access: ROUTE_ACCESS.PRIVATE,
+        element: <ExercisesPage />,
       },
       {
         path: ROUTES.PROFILE,
